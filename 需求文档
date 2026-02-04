@@ -1,0 +1,71 @@
+# AI生成图片与视频工具站需求文档
+
+## 一、项目简介
+开发一个基于AI的图片与视频生成工具站，支持文生图、图生图、文生视频、图片转视频等功能，面向创作者和普通用户，提供便捷的AI内容生成服务。网站部署在Vercel平台。
+
+## 二、核心功能
+1. 文生图（Text-to-Image）：输入文本生成图片，分辨率选择，图片下载。
+2. 图生图（Image-to-Image）：上传图片+描述生成新图片。
+3. 文生视频（Text-to-Video）：输入文本生成短视频，视频下载。
+4. 图片转视频（Image/Images-to-Video）：上传图片生成动画/视频。
+5. 用户管理与订单记录：google登录、记录用户购买订单。
+6. 工具与扩展：图片/视频简单编辑工具，API接口开放。
+
+## 三、技术选型
+- 前端：Next.js（React）、Tailwind CSS/Ant Design、TypeScript
+- 后端：Node.js（API路由）、Serverless Functions（Vercel原生支持）使用 SWR 或 React Query（推荐）
+- AI服务：第三方AI模型API（如Stable Diffusion、Midjourney、OpenAI、Pika Labs等），或自建推理服务
+- 存储：Vercel自带/第三方云存储（如Supabase、AWS S3）
+- 数据库：Supabase（主数据库，负责用户、订单记录）
+	> 当前数据库仅有模型表，需补充用户表和订单记录表，以支持用户管理和订单功能。
+	> 用户表需包含：
+	> - 用户金币数量字段
+	> - 订阅类型字段（目前仅支持“周订阅”和“年订阅”）
+- 鉴权：NextAuth.js/OAuth
+- 部署：Vercel
+
+## 四、页面与交互
+- 首页：功能介绍、入口导航
+- 文生图页、图生图页、文生视频页、图片转视频页：输入、参数选择、生成与结果展示
+- 用户中心：登录、订单记录、金币余额
+- 订阅页：订阅选项、支付接口【暂时没有支付接口】
+
+
+---
+## 九、第三方AI模型API（shortapi.ai）
+
+- API Key：ak-a7920a1efe8311f0973fb208ad6ae175
+
+### 生成任务接口示例
+
+```bash
+response=$(curl --request POST \
+	--url https://api.shortapi.ai/api/v1/job/create \
+	--header "Authorization: Bearer $SHORTAPI_KEY" \
+	--header "Content-Type: application/json" \
+	--data '{
+		"model": "vidu/vidu-q2/text-to-video",
+		"args": {
+				"prompt": "Capture a serene moment of a small Corgi elegantly swimming in a sun-drenched swimming pool. An underwater perspective showcases the dog, its gentle smile illuminated by soft golden hour light, with light and shadow playing across the pool floor. The scene is rendered in soft pastel tones, enhancing the dreamy atmosphere. High-resolution photography captures the texture of the water and every detail of the Corgi's joyful expression, creating a simple yet cinematic image of tranquility and innocence. This minimalist yet evocative setting conveys a sense of peace and happiness, resulting in a serene and visually captivating cinematic scene."
+		},
+		"callback_url": "$CALLBACK_URL"
+}')
+JOB_ID=$(echo "$response" | grep -o '"job_id": *"[^"']*' | sed 's/"job_id": *//; s/"//g')
+```
+
+### 查询任务接口示例
+
+```bash
+curl --request GET \
+	--url "https://api.shortapi.ai/api/v1/job/query?id=$JOB_ID" \
+	--header "Authorization: Bearer $SHORTAPI_KEY"
+```
+
+> 注意：API Key属于敏感信息，生产环境请妥善保管，避免泄露。
+## 八、Supabase配置
+
+- Project URL：https://sywvmqpkhvclavgoinsl.supabase.co
+- Publishable API Key：sb_publishable_qAbiOWGYAwgV0dIflEFsYw_4GwmffVF
+
+> 注意：API Key属于敏感信息，生产环境请妥善保管，避免泄露。
+如需详细技术方案、接口文档或原型设计，可进一步补充。
