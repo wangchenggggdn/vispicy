@@ -1,0 +1,13 @@
+# Robot.txt file for vispicy.com
+# Allow all crawlers
+
+User-agent: *
+Allow: /
+
+# Disallow API routes
+Disallow: /api/
+Disallow: /_next/
+Disallow: /static/
+
+# Sitemap location
+Sitemap: https://vispicy.com/sitemap.xml
