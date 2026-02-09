@@ -71,6 +71,18 @@ export const PRICING_RULES: PricingRules = {
         '10_1080p': 1000,
       },
     },
+    'vidu/vidu-q3/text-to-video': {
+      basePrice: 800,
+      // 使用价格映射表（duration_resolution 格式）
+      priceMap: {
+        '5_720p': 800,
+        '5_1080p': 1000,
+        '10_720p': 1200,
+        '10_1080p': 1400,
+        '15_720p': 1600,
+        '15_1080p': 1800,
+      },
+    },
   },
 
   // 图生视频定价（同文生视频）
@@ -92,6 +104,20 @@ export const PRICING_RULES: PricingRules = {
         '5_1080p': 600,
         '10_720p': 1000,
         '10_1080p': 1000,
+      },
+    },
+  },
+
+  // 多图生视频定价
+  images2video: {
+    'vidu/vidu-q2/reference-to-video': {
+      basePrice: 800,
+      // 使用价格映射表
+      priceMap: {
+        '5_720p': 800,
+        '5_1080p': 1000,
+        '10_720p': 1200,
+        '10_1080p': 1500,
       },
     },
   },

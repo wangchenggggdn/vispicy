@@ -11,30 +11,44 @@ const sampleWorks = [
   {
     id: 1,
     type: 'image',
-    url: 'https://images.unsplash.com/photo-1614730341194-75c60740a2d3?w=400&h=400&fit=crop',
-    title: 'Cyberpunk City',
-    alt: 'AI-generated cyberpunk cityscape with neon lights and futuristic buildings'
+    url: '/img/afe5ed2bae792b772388d32da074dd96.jpeg',
+    title: 'AI Portrait Art',
+    alt: 'AI-generated portrait artwork with stunning details'
   },
   {
     id: 2,
-    type: 'image',
-    url: 'https://images.unsplash.com/photo-1634017839464-5c339ez97e20?w=400&h=400&fit=crop',
-    title: 'Fantasy Forest',
-    alt: 'Magical fantasy forest created by AI with glowing mushrooms and ethereal lighting'
+    type: 'video',
+    url: '/img/f01bfe791b0323e2c3e2a212c55d0d1a.mp4',
+    title: 'AI Animation',
+    alt: 'AI-generated animation video showcasing dynamic motion'
   },
   {
     id: 3,
     type: 'image',
-    url: 'https://images.unsplash.com/photo-1686191128892-3b37add4c844?w=400&h=400&fit=crop',
-    title: 'AI Portrait',
-    alt: 'Professional AI-generated portrait with realistic details and lighting'
+    url: '/img/bf94fec7c0cc5937bbc1e864406a925f.jpg',
+    title: 'Creative Concept',
+    alt: 'AI-generated creative concept art with vibrant colors'
   },
   {
     id: 4,
+    type: 'video',
+    url: '/img/8aa710b54100b4a7e154c204ea6a5944.mp4',
+    title: 'Motion Design',
+    alt: 'AI-generated motion design with smooth transitions'
+  },
+  {
+    id: 5,
     type: 'image',
-    url: 'https://images.unsplash.com/photo-1618172193763-c511deb635ca?w=400&h=400&fit=crop',
-    title: 'Artistic Painting',
-    alt: 'AI-created artistic painting in impressionist style with vibrant colors'
+    url: '/img/8610b39cb38e48e5f67a22b48ceb8d3c.jpeg',
+    title: 'Digital Illustration',
+    alt: 'AI-generated digital illustration with artistic style'
+  },
+  {
+    id: 6,
+    type: 'video',
+    url: '/img/fc5cceb54c73cd8acbf0c0e38d437655.mp4',
+    title: 'Video Generation',
+    alt: 'AI-generated video content with impressive effects'
   },
 ];
 
@@ -270,22 +284,42 @@ export default function Home() {
               Explore stunning creations powered by Vispicy AI. Each image is generated entirely by artificial intelligence.
             </p>
 
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-6xl mx-auto">
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-6 max-w-6xl mx-auto">
               {sampleWorks.map((work) => (
                 <div
                   key={work.id}
-                  className="group relative aspect-square rounded-xl overflow-hidden shadow-lg hover:shadow-xl transition"
+                  className="group relative aspect-square rounded-xl overflow-hidden shadow-lg hover:shadow-xl transition bg-gray-100"
                 >
-                  <img
-                    src={work.url}
-                    alt={work.alt}
-                    title={work.title}
-                    className="w-full h-full object-cover group-hover:scale-110 transition duration-300"
-                    loading="lazy"
-                  />
+                  {work.type === 'video' ? (
+                    <video
+                      src={work.url}
+                      alt={work.alt}
+                      title={work.title}
+                      className="w-full h-full object-cover group-hover:scale-110 transition duration-300"
+                      autoPlay
+                      muted
+                      loop
+                      playsInline
+                    />
+                  ) : (
+                    <img
+                      src={work.url}
+                      alt={work.alt}
+                      title={work.title}
+                      className="w-full h-full object-cover group-hover:scale-110 transition duration-300"
+                      loading="lazy"
+                    />
+                  )}
                   <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition">
                     <div className="absolute bottom-0 left-0 right-0 p-4">
-                      <h3 className="text-white font-semibold">{work.title}</h3>
+                      <div className="flex items-center gap-2 mb-1">
+                        {work.type === 'video' ? (
+                          <VideoIcon className="w-4 h-4 text-white" />
+                        ) : (
+                          <ImageIcon className="w-4 h-4 text-white" />
+                        )}
+                        <h3 className="text-white font-semibold">{work.title}</h3>
+                      </div>
                       <p className="text-white/80 text-sm">AI Generated</p>
                     </div>
                   </div>
@@ -417,6 +451,7 @@ export default function Home() {
                 <ul className="space-y-2 text-sm text-gray-600">
                   <li><Link href="/about" className="hover:text-red-600 transition">About Us</Link></li>
                   <li><Link href="/pricing" className="hover:text-red-600 transition">Pricing</Link></li>
+                  <li><Link href="/blog" className="hover:text-red-600 transition">Blog</Link></li>
                   <li><Link href="/contact" className="hover:text-red-600 transition">Contact</Link></li>
                 </ul>
               </nav>

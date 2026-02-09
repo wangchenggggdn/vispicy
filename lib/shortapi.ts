@@ -24,6 +24,14 @@ function convertParamType(value: unknown, type: string): unknown {
   }
 }
 
+// 参数值映射配置
+const PARAM_VALUE_MAPPINGS: Record<string, Record<string, string>> = {
+  performance: {
+    'Speed': 'schnell',
+    'Quality': 'dev',
+  },
+};
+
 // 转换参数类型（根据模型参数定义）
 export function transformParams(
   params: Record<string, unknown>,
@@ -37,7 +45,18 @@ export function transformParams(
 
     if (paramDef && paramDef.type && value !== null && value !== undefined) {
       // 根据类型转换
-      transformed[key] = convertParamType(value, paramDef.type);
+      let convertedValue = convertParamType(value, paramDef.type);
+
+      // 如果有值映射配置，进行值映射
+      if (PARAM_VALUE_MAPPINGS[key] && typeof convertedValue === 'string') {
+        const mappedValue = PARAM_VALUE_MAPPINGS[key][convertedValue];
+        if (mappedValue) {
+          console.log(`[transformParams] ${key}: Mapping value "${convertedValue}" -> "${mappedValue}"`);
+          convertedValue = mappedValue;
+        }
+      }
+
+      transformed[key] = convertedValue;
       console.log(`[transformParams] ${key}: ${JSON.stringify(value)} -> ${JSON.stringify(transformed[key])} (type: ${paramDef.type})`);
     } else {
       // 没有定义的参数保持原样

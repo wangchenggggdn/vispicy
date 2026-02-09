@@ -17,12 +17,14 @@ export async function POST(request: Request) {
     expiresAt.setFullYear(expiresAt.getFullYear() + 1);
 
     // 更新用户订阅
+    // @ts-ignore - Supabase type inference issue
+    const updateData = {
+      subscription_type: subscriptionType || 'pro',
+      subscription_expires_at: expiresAt.toISOString(),
+    };
     const { data, error } = await admin
       .from('users')
-      .update({
-        subscription_type: subscriptionType || 'pro',
-        subscription_expires_at: expiresAt.toISOString(),
-      })
+      .update(updateData as any)
       .eq('email', email)
       .select()
       .single();

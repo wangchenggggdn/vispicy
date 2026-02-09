@@ -21,10 +21,10 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'PayPal configuration error' }, { status: 500 });
     }
 
-    // 检查登录状态
+    // Check authentication
     const session = await getServerSession(authOptions);
     if (!session || !session.user?.id) {
-      return NextResponse.json({ error: '请先登录' }, { status: 401 });
+      return NextResponse.json({ error: 'Please login first' }, { status: 401 });
     }
 
     const userId = session.user.id;
@@ -33,10 +33,10 @@ export async function POST(request: Request) {
 
     console.log('[Create Order] Request body:', { type, planId, billingCycle, packageId });
 
-    // 获取用户信息
+    // Get user info
     const user = await getUserById(userId);
     if (!user) {
-      return NextResponse.json({ error: '用户不存在' }, { status: 404 });
+      return NextResponse.json({ error: 'User not found' }, { status: 404 });
     }
 
     let amount = 0;
@@ -46,7 +46,7 @@ export async function POST(request: Request) {
     let subscriptionExpiresAt: Date | null = null;
 
     if (type === 'subscription') {
-      // 订阅支付 - 从数据库获取配置
+      // Subscription payment - get config from database
       const subscription = await getSubscriptionPackage(planId, billingCycle);
       if (!subscription) {
         return NextResponse.json({ error: 'Invalid subscription plan' }, { status: 400 });
@@ -54,10 +54,10 @@ export async function POST(request: Request) {
 
       amount = subscription.price;
       coins = subscription.coins;
-      description = `${planId.toUpperCase()} - ${billingCycle === 'week' ? '周付' : '年付'}`;
+      description = `${planId.toUpperCase()} - ${billingCycle === 'week' ? 'Weekly' : 'Yearly'}`;
       subscriptionType = planId;
 
-      // 计算订阅过期时间
+      // Calculate subscription expiration time
       const now = new Date();
       if (billingCycle === 'year') {
         subscriptionExpiresAt = new Date(now.setFullYear(now.getFullYear() + 1));
@@ -65,7 +65,7 @@ export async function POST(request: Request) {
         subscriptionExpiresAt = new Date(now.setDate(now.getDate() + 7));
       }
     } else if (type === 'coins') {
-      // 金币购买 - 从数据库获取配置
+      // Coin purchase - get config from database
       const pkg = await getCoinPackage(packageId);
       if (!pkg) {
         return NextResponse.json({ error: 'Invalid coin package' }, { status: 400 });
@@ -73,7 +73,7 @@ export async function POST(request: Request) {
 
       amount = pkg.price;
       coins = pkg.coins + (pkg.bonus_coins || 0);
-      description = `${packageId.toUpperCase()} - ${coins} 金币`;
+      description = `${packageId.toUpperCase()} - ${coins} Coins`;
     } else {
       return NextResponse.json({ error: 'Invalid payment type' }, { status: 400 });
     }
@@ -109,7 +109,7 @@ export async function POST(request: Request) {
         application_context: {
           return_url: `${baseUrl}/payment/return`,
           cancel_url: `${baseUrl}/payment/cancel`,
-          brand_name: 'ViCraft',
+          brand_name: 'Vispicy',
           user_action: 'PAY_NOW',
           landing_page: 'BILLING',
         },

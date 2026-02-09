@@ -53,17 +53,6 @@ export function useCoins(refreshInterval: number = 60) {
     }
   }, [session?.user?.id, initialized, fetchCoins]);
 
-  // 定期刷新金币
-  useEffect(() => {
-    if (!session?.user?.id) return;
-
-    const interval = setInterval(() => {
-      fetchCoins();
-    }, refreshInterval * 1000);
-
-    return () => clearInterval(interval);
-  }, [session, refreshInterval, fetchCoins]);
-
   // 监听金币更新事件
   useEffect(() => {
     const handleCoinsUpdate = () => {

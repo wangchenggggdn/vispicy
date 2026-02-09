@@ -119,9 +119,13 @@ export default function TextToImagePage() {
             // [{url: ...}, {url: ...}]
             urls = data.result.images.map((img: any) => img.url).filter(Boolean);
           } else if (Array.isArray(data.result)) {
-            // [url1, url2, ...]
-            urls = data.result.filter((item: any) => typeof item === 'string' || item?.url);
-            if (urls.length > 0 && urls[0]?.url) urls = urls.map((u: any) => u.url);
+            // [url1, url2, ...] 或 [{url: ...}, {url: ...}]
+            const items = data.result.filter((item: any) => typeof item === 'string' || item?.url);
+            if (items.length > 0 && typeof items[0] === 'object' && items[0]?.url) {
+              urls = items.map((u: any) => u.url);
+            } else {
+              urls = items as string[];
+            }
           } else if (data.result.url) {
             // {url: "..."}
             urls = [data.result.url];

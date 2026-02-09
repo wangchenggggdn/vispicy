@@ -3,7 +3,6 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useSession } from 'next-auth/react';
 import { ImageIcon, Download, Loader2, Upload, Coins } from 'lucide-react';
-import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import useSWR from 'swr';
 import ModelParamsForm from '@/components/ModelParamsForm';
@@ -25,7 +24,6 @@ const fetcher = (url: string) => fetch(url).then((res) => res.json());
 
 export default function ImageToImagePage() {
   const { data: session } = useSession();
-  const router = useRouter();
   const { calculateDiscountedPrice } = useDiscountedPrice();
   const [prompt, setPrompt] = useState('');
   const [selectedModel, setSelectedModel] = useState('');
@@ -113,9 +111,13 @@ export default function ImageToImagePage() {
             // [{url: ...}, {url: ...}]
             urls = data.result.images.map((img: any) => img.url).filter(Boolean);
           } else if (Array.isArray(data.result)) {
-            // [url1, url2, ...]
-            urls = data.result.filter((item: any) => typeof item === 'string' || item?.url);
-            if (urls.length > 0 && urls[0]?.url) urls = urls.map((u: any) => u.url);
+            // [url1, url2, ...] 或 [{url: ...}, {url: ...}]
+            const items = data.result.filter((item: any) => typeof item === 'string' || item?.url);
+            if (items.length > 0 && typeof items[0] === 'object' && items[0]?.url) {
+              urls = items.map((u: any) => u.url);
+            } else {
+              urls = items as string[];
+            }
           } else if (data.result.url) {
             // {url: "..."}
             urls = [data.result.url];

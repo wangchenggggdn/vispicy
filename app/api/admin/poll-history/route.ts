@@ -1,6 +1,12 @@
 import { NextResponse } from 'next/server';
 import { getSupabaseAdmin } from '@/lib/supabase';
-import { getJobResult } from '@/lib/shortapi';
+
+interface GenerationRecord {
+  job_id: string;
+  task_type: string;
+  status: number;
+  [key: string]: any;
+}
 
 export async function POST(request: Request) {
   try {
@@ -14,12 +20,15 @@ export async function POST(request: Request) {
     const admin = getSupabaseAdmin();
 
     // 获取所有进行中的记录
-    const { data: pendingRecords, error: fetchError } = await admin
-      .from('generation_history')
-      .select('*')
-      .eq('status', 1)
-      .order('created_at', { ascending: true })
-      .limit(100);
+    const { data: pendingRecords, error: fetchError } = await (async () => {
+      // @ts-ignore - Supabase type inference issue
+      return admin
+        .from('generation_history')
+        .select('*')
+        .eq('status', 1)
+        .order('created_at', { ascending: true })
+        .limit(100);
+    })();
 
     if (fetchError) throw fetchError;
 
@@ -36,7 +45,7 @@ export async function POST(request: Request) {
     let updatedCount = 0;
     const results = [];
 
-    for (const record of pendingRecords) {
+    for (const record of pendingRecords as GenerationRecord[]) {
       try {
         // 根据task_type确定API路径
         const apiPaths: Record<string, string> = {
@@ -66,28 +75,34 @@ export async function POST(request: Request) {
         // 更新记录
         if (data.status === 2 && data.result) {
           // 成功
-          await admin
-            .from('generation_history')
-            .update({
+          await (async () => {
+            // @ts-ignore - Supabase type inference issue
+            const query = admin.from('generation_history');
+            const updateData = {
               status: 2,
               result: data.result,
               updated_at: new Date().toISOString(),
-            })
-            .eq('job_id', record.job_id);
+            };
+            // @ts-ignore - Supabase type inference issue
+            await query.update(updateData as any).eq('job_id', record.job_id);
+          })();
 
           updatedCount++;
           results.push({ jobId: record.job_id, status: 'success' });
           console.log(`[Poll-History] Job ${record.job_id} completed successfully`);
         } else if (data.status === 3) {
           // 失败
-          await admin
-            .from('generation_history')
-            .update({
+          await (async () => {
+            // @ts-ignore - Supabase type inference issue
+            const query = admin.from('generation_history');
+            const updateData = {
               status: 3,
               error_message: data.error || '生成失败',
               updated_at: new Date().toISOString(),
-            })
-            .eq('job_id', record.job_id);
+            };
+            // @ts-ignore - Supabase type inference issue
+            await query.update(updateData as any).eq('job_id', record.job_id);
+          })();
 
           updatedCount++;
           results.push({ jobId: record.job_id, status: 'failed' });

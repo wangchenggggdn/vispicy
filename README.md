@@ -37,13 +37,13 @@ npm install
 
 ### 3. 配置环境变量
 
-复制 `.env.local.example` 到 `.env.local` 并填写配置：
+复制 `.env.example` 到 `.env.local` 并填写配置：
 
 ```bash
-cp .env.local.example .env.local
+cp .env.example .env.local
 ```
 
-需要配置的环境变量：
+需要配置的环境变量（详细说明见 `.env.example`）：
 
 ```env
 # Supabase
@@ -58,8 +58,17 @@ NEXTAUTH_SECRET=your-nextauth-secret
 GOOGLE_CLIENT_ID=your-google-client-id
 GOOGLE_CLIENT_SECRET=your-google-client-secret
 
+# Apple Sign In
+APPLE_ID=your-apple-services-id
+APPLE_SECRET=your-generated-jwt-token
+
 # ShortAPI
 SHORTAPI_API_KEY=your-shortapi-api-key
+
+# PayPal (Sandbox for development)
+NEXT_PUBLIC_PAYPAL_CLIENT_ID=your-paypal-client-id
+PAYPAL_SECRET=your-paypal-secret
+PAYPAL_API_BASE=https://api-m.sandbox.paypal.com
 
 # App
 NEXT_PUBLIC_APP_URL=http://localhost:3000
@@ -77,14 +86,30 @@ npm run dev
 
 访问 [http://localhost:3000](http://localhost:3000)
 
-## Google OAuth 配置
+## OAuth 配置
+
+### Google OAuth
 
 1. 访问 [Google Cloud Console](https://console.cloud.google.com/)
 2. 创建新项目或选择现有项目
 3. 启用 Google+ API
 4. 创建 OAuth 2.0 凭据
-5. 设置授权重定向 URI: `http://localhost:3000/api/auth/callback/google`
-6. 复制 Client ID 和 Client Secret 到 `.env.local`
+5. 设置授权重定向 URI:
+   - 本地: `http://localhost:3000/api/auth/callback/google`
+   - 生产: `https://vispicy.com/api/auth/callback/google`
+6. 复制 Client ID 和 Client Secret 到环境变量
+
+### Apple Sign In
+
+1. 访问 [Apple Developer](https://developer.apple.com/account/)
+2. 创建 App ID 和 Services ID
+3. 配置回调 URL:
+   - 本地: `http://localhost:3000/api/auth/callback/apple`
+   - 生产: `https://vispicy.com/api/auth/callback/apple`
+4. 创建私钥（.p8文件）
+5. 使用 `generate-apple-secret-auto.js` 生成 APPLE_SECRET
+
+**⚠️ 重要**: APPLE_SECRET 有效期为 180 天，到期需重新生成。
 
 ## 项目结构
 
@@ -187,6 +212,15 @@ vicraft/
 
 ## 部署
 
+### Netlify 部署（推荐）
+
+1. 将代码推送到 GitHub
+2. 在 Netlify 中导入项目
+3. 配置环境变量：参考 `NETLIFY_PRODUCTION_CONFIG.txt` 或 `docs/ENVIRONMENT_SETUP.md`
+4. 部署完成
+
+**⚠️ 重要**: 生产环境需要在各平台配置正确的回调 URL（vispicy.com）
+
 ### Vercel 部署
 
 1. 将代码推送到 GitHub
@@ -200,6 +234,11 @@ vicraft/
 npm run build
 npm start
 ```
+
+### 环境配置文档
+
+- 📄 **本地开发**: 参考 `.env.example`
+- 🌐 **生产环境**: 参考 `NETLIFY_PRODUCTION_CONFIG.txt` 或 `docs/ENVIRONMENT_SETUP.md`
 
 ## 待实现功能
 

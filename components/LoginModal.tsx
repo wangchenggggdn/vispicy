@@ -27,45 +27,30 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
   const handleMockLogin = async () => {
     setLoading('mock');
     try {
-      // 生成有效的 UUID v4 格式 ID
-      const generateUUID = () => {
-        return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
-          const r = Math.random() * 16 | 0;
-          const v = c === 'x' ? r : (r & 0x3 | 0x8);
-          return v.toString(16);
-        });
-      };
+      console.log('[Mock Login] Initiating mock login...');
 
-      // 模拟用户信息
-      const mockUser = {
-        id: generateUUID(), // 使用有效的 UUID 格式
+      // 使用 NextAuth 的 signIn 方法，传入 credentials
+      const result = await signIn('mock-login', {
         email: 'test@vicraft.com',
         name: 'Test User',
         image: 'https://api.dicebear.com/7.x/avataaars/svg?seed=' + Date.now(),
-      };
-
-      console.log('[Mock Login] Initiating mock login with user:', mockUser);
-
-      // 调用模拟登录 API
-      const response = await fetch('/api/auth/mock-login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(mockUser),
+        redirect: false, // 不自动跳转
       });
 
-      const data = await response.json();
+      console.log('[Mock Login] SignIn result:', result);
 
-      if (response.ok && data.success) {
-        console.log('[Mock Login] Success:', data.user);
+      if (result?.ok) {
+        console.log('[Mock Login] Success!');
 
         // 关闭弹窗
         onClose();
 
         // 刷新页面以显示登录状态
+        console.log('[Mock Login] Reloading page...');
         window.location.reload();
       } else {
-        console.error('[Mock Login] Failed:', data.error);
-        alert('Login failed: ' + data.error);
+        console.error('[Mock Login] Failed:', result?.error);
+        alert('Login failed: ' + (result?.error || 'Unknown error'));
       }
     } catch (error) {
       console.error('[Mock Login] Error:', error);
@@ -97,7 +82,7 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
 
         {/* 标题 */}
         <div className="text-center mb-8">
-          <h2 className="text-2xl font-bold text-gray-900 mb-2">Welcome to ViCraft</h2>
+          <h2 className="text-2xl font-bold text-gray-900 mb-2">Welcome to Vispicy</h2>
           <p className="text-gray-600">Sign in to use AI creative tools</p>
         </div>
 

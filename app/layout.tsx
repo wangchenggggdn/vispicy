@@ -18,7 +18,7 @@ export const metadata: Metadata = {
   },
   icons: {
     icon: '/favicon.ico',
-    apple: '/apple-icon.png',
+    apple: '/favicon.png',
   },
   openGraph: {
     type: 'website',
@@ -56,6 +56,10 @@ export const metadata: Metadata = {
   },
   verification: {
     // google: 'your-google-verification-code',
+  },
+  other: {
+    'application-name': 'Vispicy',
+    'apple-mobile-web-app-title': 'Vispicy',
   },
 };
 

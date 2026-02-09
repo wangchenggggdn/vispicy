@@ -6,15 +6,20 @@
     "dev": "next dev -H 0.0.0.0",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "type-check": "tsc --noEmit",
+    "check": "npm run lint && npm run type-check"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.49.4",
+    "jsonwebtoken": "^9.0.3",
     "lucide-react": "^0.563.0",
     "next": "^15.2.4",
     "next-auth": "^4.24.11",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
+    "react-markdown": "^10.1.0",
+    "remark-gfm": "^4.0.1",
     "swr": "^2.3.3"
   },
   "devDependencies": {

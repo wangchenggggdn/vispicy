@@ -8,6 +8,7 @@ import Link from 'next/link';
 import useSWR from 'swr';
 import ModelParamsForm from '@/components/ModelParamsForm';
 import LoginModal from '@/components/LoginModal';
+import SmoothChiliLoading from '@/components/SmoothChiliLoading';
 import { AIModel } from '@/types';
 import { calculatePrice } from '@/lib/pricing';
 import { triggerCoinsUpdate } from '@/hooks/use-coins';
@@ -137,7 +138,7 @@ export default function TextToVideoPage() {
     }
 
     if (!selectedModel) {
-      setError('请选择模型');
+      setError('Please select a model');
       return;
     }
 
@@ -282,12 +283,12 @@ export default function TextToVideoPage() {
                 {loading ? (
                   <>
                     <Loader2 className="w-5 h-5 animate-spin" />
-                    <span>生成中...</span>
+                    <span>Generating...</span>
                   </>
                 ) : (
                   <>
                     <VideoIcon className="w-5 h-5" />
-                    <span>Generate Video ({calculatedPrice === 0 ? '免费' : (
+                    <span>Generate Video ({calculatedPrice === 0 ? 'Free' : (
                       <>
                         {calculatedPrice}
                         <Coins className="w-4 h-4 inline ml-0.5" />
@@ -299,7 +300,7 @@ export default function TextToVideoPage() {
 
               {!session && (
                 <p className="text-center text-sm text-gray-500">
-                  请先<Link href="/api/auth/signin" className="text-pink-600 hover:underline">登录</Link>后使用
+                  Please<Link href="/api/auth/signin" className="text-pink-600 hover:underline">sign in</Link>to use this feature
                 </p>
               )}
 
@@ -319,16 +320,23 @@ export default function TextToVideoPage() {
               <div className="aspect-video bg-gray-100 rounded-lg flex items-center justify-center">
                 <div className="text-center">
                   <Loader2 className="w-12 h-12 animate-spin text-pink-600 mx-auto mb-4" />
-                  <p className="text-gray-600">正在创建任务...</p>
+                  <p className="text-gray-600">Creating task...</p>
                 </div>
               </div>
             )}
 
             {!loading && jobId && !result && (
               <div className="p-6 bg-green-50 border border-green-200 rounded-lg">
-                <p className="text-green-800 font-medium mb-2">✓ 任务创建成功！</p>
-                <p className="text-sm text-green-700">任务ID: <code className="bg-green-100 px-2 py-1 rounded">{jobId}</code></p>
-                <p className="text-sm text-green-700 mt-2">AI正在后台处理，请稍等...</p>
+                <div className="flex items-start justify-between">
+                  <div className="flex-1">
+                    <p className="text-green-800 font-medium mb-2">✓ Task created successfully!</p>
+                    <p className="text-sm text-green-700">Task ID: <code className="bg-green-100 px-2 py-1 rounded">{jobId}</code></p>
+                    <p className="text-sm text-green-700 mt-2">AI is processing in the background, please wait...</p>
+                  </div>
+                  <div className="ml-4">
+                    <SmoothChiliLoading size={80} showText={false} />
+                  </div>
+                </div>
               </div>
             )}
 

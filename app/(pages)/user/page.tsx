@@ -1,6 +1,6 @@
 'use client';
 
-import { useSession, signOut } from 'next-auth/react';
+import { useSession, signOut, getSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import useSWR from 'swr';
@@ -17,7 +17,7 @@ const fetcher = (url: string) => fetch(url).then((res) => res.json());
 export const dynamic = 'force-dynamic';
 
 export default function UserPage() {
-  const { data: session, status } = useSession();
+  const { data: session, status, update } = useSession();
   const router = useRouter();
   const pollingJobsRef = useRef<Set<string>>(new Set());
   const [shouldPoll, setShouldPoll] = useState(true);
@@ -25,6 +25,7 @@ export default function UserPage() {
   const [showDetailModal, setShowDetailModal] = useState(false);
   const [showSubscriptionModal, setShowSubscriptionModal] = useState(false);
   const [showCoinPurchaseModal, setShowCoinPurchaseModal] = useState(false);
+  const [isRefreshing, setIsRefreshing] = useState(false);
   const { coins } = useCoins(30); // 30秒刷新一次，更频繁以实时显示
   const {
     rights_type,
@@ -32,6 +33,32 @@ export default function UserPage() {
     subscription_expires_at,
     isActive: hasActiveSubscription
   } = useSubscription(30); // 30秒刷新一次Subscription Status
+
+  // 尝试刷新 session
+  useEffect(() => {
+    const refreshSession = async () => {
+      if (status === 'unauthenticated') {
+        console.log('[User Page] No session detected, trying to refresh...');
+        setIsRefreshing(true);
+        try {
+          await update();
+          // 如果还是没有 session，再次检查
+          const currentSession = await getSession();
+          if (currentSession) {
+            console.log('[User Page] Session found after refresh');
+          } else {
+            console.log('[User Page] Still no session after refresh');
+          }
+        } catch (error) {
+          console.error('[User Page] Error refreshing session:', error);
+        } finally {
+          setIsRefreshing(false);
+        }
+      }
+    };
+
+    refreshSession();
+  }, [status, update]);
 
   const { data: orders } = useSWR(
     session?.user ? '/api/orders' : null,
@@ -131,7 +158,7 @@ export default function UserPage() {
     };
   }, []);
 
-  if (status === 'loading') {
+  if (status === 'loading' || isRefreshing) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600"></div>
@@ -490,9 +517,11 @@ function ResultDisplay({ result, taskType }: { result: any; taskType: string }) 
       return result.images.map((img: any) => img.url).filter(Boolean);
     }
     if (Array.isArray(result)) {
-      const urls = result.filter((item: any) => typeof item === 'string' || item?.url);
-      if (urls.length > 0 && urls[0]?.url) return urls.map((u: any) => u.url);
-      return urls;
+      const items = result.filter((item: any) => typeof item === 'string' || item?.url);
+      if (items.length > 0 && typeof items[0] === 'object' && items[0]?.url) {
+        return items.map((u: any) => u.url);
+      }
+      return items as string[];
     }
     if (result.url) return [result.url];
     if (result.video) return [result.video];

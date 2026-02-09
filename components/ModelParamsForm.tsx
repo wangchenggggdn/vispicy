@@ -5,10 +5,13 @@ import React from 'react';
 export interface ModelParameter {
   name: string;
   type: string;
+  title?: string; // 页面显示的友好名称（优先级最高）
+  label?: string; // 备用显示名称
   description?: string;
   default?: any;
   required?: boolean;
   enum?: any[];
+  options?: any[]; // 下拉选项
   min?: number;
   max?: number;
 }
@@ -64,15 +67,16 @@ export default function ModelParamsForm({
         );
 
       case 'int':
-        if (param.enum) {
+        if (param.enum || param.options) {
+          const options = param.enum || param.options || [];
           return (
             <select
               value={value ?? param.default ?? ''}
-              onChange={(e) => handleChange(param.name, parseInt(e.target.value))}
+              onChange={(e) => handleChange(param.name, param.type === 'int' ? parseInt(e.target.value) : e.target.value)}
               disabled={disabled}
               className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
             >
-              {param.enum.map((v) => (
+              {options.map((v: any) => (
                 <option key={v} value={v}>
                   {v}
                 </option>
@@ -106,8 +110,10 @@ export default function ModelParamsForm({
           />
         );
 
+      case 'select':
       case 'string':
-        if (param.enum) {
+        if (param.enum || param.options) {
+          const options = param.enum || param.options || [];
           return (
             <select
               value={value ?? param.default ?? ''}
@@ -115,7 +121,7 @@ export default function ModelParamsForm({
               disabled={disabled}
               className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
             >
-              {param.enum.map((v) => (
+              {options.map((v: any) => (
                 <option key={v} value={v}>
                   {v}
                 </option>
@@ -158,9 +164,9 @@ export default function ModelParamsForm({
     }
   };
 
-  // 过滤掉prompt和image参数，这些已经在主界面有了
+  // 过滤掉prompt、image和image_count参数，这些已经在主界面有了或自动计算
   const filteredParams = paramsArray.filter(
-    (p) => p.name !== 'prompt' && p.name !== 'image' && p.name !== 'image_urls'
+    (p) => p.name !== 'prompt' && p.name !== 'image' && p.name !== 'image_urls' && p.name !== 'imagecount' && p.name !== 'image_count' && p.name !== 'images'
   );
 
   if (filteredParams.length === 0) {
@@ -173,7 +179,7 @@ export default function ModelParamsForm({
       {filteredParams.map((param) => (
         <div key={param.name}>
           <label className="block text-sm font-medium mb-2">
-            {param.name}
+            {param.title || param.label || param.name}
             {param.required && <span className="text-red-500 ml-1">*</span>}
           </label>
           {renderInput(param)}

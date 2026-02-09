@@ -9,7 +9,7 @@ export async function POST(request: Request) {
     // 检查权限
     const session = await getServerSession(authOptions);
     if (!session || !session.user?.id) {
-      return NextResponse.json({ error: '请先登录' }, { status: 401 });
+      return NextResponse.json({ error: 'Please login first' }, { status: 401 });
     }
 
     // TODO: 添加管理员权限检查

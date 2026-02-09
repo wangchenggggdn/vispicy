@@ -7,5 +7,12 @@ export default function Providers({
 }: {
   children: React.ReactNode;
 }) {
-  return <SessionProvider>{children}</SessionProvider>;
+  return (
+    <SessionProvider
+      refetchInterval={5 * 60} // 每5分钟自动刷新session
+      refetchOnWindowFocus={true} // 窗口聚焦时刷新session
+    >
+      {children}
+    </SessionProvider>
+  );
 }

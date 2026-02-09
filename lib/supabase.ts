@@ -58,23 +58,25 @@ export async function getUserByEmail(email: string) {
 }
 
 export async function createUser(userData: {
-  id: string;
   email: string;
   name?: string | null;
   image?: string | null;
   coins?: number;
+  apple_id?: string;
+  google_id?: string;
 }) {
   // Use supabaseAdmin to bypass RLS policies
   const admin = getSupabaseAdmin();
   const { data, error } = await admin
     .from('users')
     .insert({
-      id: userData.id,
       email: userData.email,
       name: userData.name,
       image: userData.image,
       coins: userData.coins ?? 0,
       subscription_type: null,
+      apple_id: userData.apple_id,
+      google_id: userData.google_id,
     })
     .select()
     .single();
@@ -87,6 +89,8 @@ export async function updateUser(userId: string, updates: {
   name?: string;
   image?: string;
   coins?: number;
+  apple_id?: string;
+  google_id?: string;
 }) {
   // Use supabaseAdmin to bypass RLS policies
   const admin = getSupabaseAdmin();
@@ -320,10 +324,15 @@ export async function updateGenerationHistory(
 
 export async function getGenerationHistoryByUserId(userId: string, limit: number = 50) {
   const admin = getSupabaseAdmin();
+
+  // Calculate 24 hours ago
+  const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
+
   const { data, error } = await admin
     .from('generation_history')
     .select('*')
     .eq('user_id', userId)
+    .gte('created_at', twentyFourHoursAgo)
     .order('created_at', { ascending: false })
     .limit(limit);
 
@@ -451,6 +460,65 @@ export async function getSubscriptionPackage(planId: string, billingCycle: strin
     .eq('plan_id', planId)
     .eq('billing_cycle', billingCycle)
     .eq('active', true)
+    .single();
+
+  if (error) throw error;
+  return data;
+}
+
+// 根据 Apple ID 查找用户
+export async function getUserByAppleId(appleId: string) {
+  const admin = getSupabaseAdmin();
+  const { data, error } = await admin
+    .from('users')
+    .select('*')
+    .eq('apple_id', appleId)
+    .maybeSingle();
+
+  if (error) {
+    console.error('[getUserByAppleId] Error:', error);
+    throw error;
+  }
+
+  return data;
+}
+
+// 根据 Google ID 查找用户
+export async function getUserByGoogleId(googleId: string) {
+  const admin = getSupabaseAdmin();
+  const { data, error } = await admin
+    .from('users')
+    .select('*')
+    .eq('google_id', googleId)
+    .maybeSingle();
+
+  if (error) {
+    console.error('[getUserByGoogleId] Error:', error);
+    throw error;
+  }
+
+  return data;
+}
+
+// Contact Message functions
+export async function createContactMessage(messageData: {
+  name: string;
+  email: string;
+  subject: string;
+  message: string;
+  user_id?: string | null;
+}) {
+  const admin = getSupabaseAdmin();
+  const { data, error } = await admin
+    .from('contact_messages')
+    .insert({
+      name: messageData.name,
+      email: messageData.email,
+      subject: messageData.subject,
+      message: messageData.message,
+      user_id: messageData.user_id,
+    } as any) // 类型断言，因为 contact_messages 表可能不在类型定义中
+    .select()
     .single();
 
   if (error) throw error;

@@ -13,7 +13,7 @@ export async function POST(request: Request) {
     const session = await getServerSession(authOptions);
 
     if (!session || !session.user?.id) {
-      return NextResponse.json({ error: '请先登录' }, { status: 401 });
+      return NextResponse.json({ error: 'Please login first' }, { status: 401 });
     }
 
     const userId = session.user.id;
@@ -52,18 +52,14 @@ export async function POST(request: Request) {
     const discountedPrice = calculateDiscountedPrice(originalPrice, rights_type, 'image');
     console.log('[Text-to-Image] Discounted price:', discountedPrice, 'coins (Subscription:', rights_type || 'none', ')');
 
-    // 检查余额
+    // Check balance
     if (totalCoins < discountedPrice) {
       return NextResponse.json({
-        error: `金币不足。需要 ${discountedPrice} 金币，当前余额 ${totalCoins} 金币`,
+        error: `Insufficient coins. Required: ${discountedPrice}, Current balance: ${totalCoins}`,
         currentCoins: totalCoins,
         requiredCoins: discountedPrice,
       }, { status: 402 });
     }
-
-    // 扣除金币（按 sub_coins -> coins -> inapp_coins 顺序）
-    await deductCoins(userId, discountedPrice);
-    console.log('[Text-to-Image] Coins deducted:', discountedPrice, 'from user', userId);
 
     // Get model info
     const models = await getModelsByType('text2image');
@@ -97,6 +93,17 @@ export async function POST(request: Request) {
 
     console.log('[Text-to-Image] Job created:', jobId);
 
+    // 验证 job_id 不为空后才扣除金币
+    if (!jobId || jobId.trim() === '') {
+      console.error('[Text-to-Image] Invalid job_id received:', jobId);
+      return NextResponse.json({ error: 'Failed to create job' }, { status: 500 });
+    }
+
+    // 扣除金币（按 sub_coins -> coins -> inapp_coins 顺序）
+    // 只有任务创建成功后才扣除金币
+    await deductCoins(userId, discountedPrice);
+    console.log('[Text-to-Image] Coins deducted:', discountedPrice, 'from user', userId);
+
     // 写入创作记录
     try {
       await createGenerationHistory({
@@ -119,7 +126,7 @@ export async function POST(request: Request) {
     return NextResponse.json({
       success: true,
       jobId: jobId,
-      message: '任务创建成功，正在处理中...'
+      message: 'Task created successfully, processing...'
     });
   } catch (error) {
     console.error('[Text-to-Image] Error:', error);

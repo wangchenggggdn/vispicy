@@ -44,7 +44,6 @@ export async function POST(request: Request) {
 
       // 创建新用户，直接给予 50 金币
       user = await createUser({
-        id,
         email,
         name,
         image,
@@ -54,27 +53,34 @@ export async function POST(request: Request) {
       console.log('[Mock Auth] New user created:', user.id, '50 coins');
     }
 
+    // 获取总金币数
+    const totalCoins = await getTotalCoins(user.id);
+
     // 创建 NextAuth JWT token
     const secret = process.env.NEXTAUTH_SECRET;
     if (!secret) {
       throw new Error('NEXTAUTH_SECRET is not set');
     }
 
-    // 创建 JWT token
+    // 创建 JWT token，包含所有必要的字段
     const token = await encode({
       token: {
         sub: user.id,
         email: user.email,
         name: user.name,
         picture: user.image,
-        iat: Date.now() / 1000,
-        exp: (Date.now() / 1000) + (30 * 24 * 60 * 60), // 30 days
+        coins: totalCoins,
+        rights_type: (user as any).rights_type || null,
+        subscription_type: (user as any).subscription_type || null,
+        subscription_expires_at: (user as any).subscription_expires_at || null,
+        iat: Math.floor(Date.now() / 1000),
+        exp: Math.floor(Date.now() / 1000) + (30 * 24 * 60 * 60), // 30 days
+        jti: user.id, // JWT ID
       },
       secret,
     });
 
-    // 获取总金币数
-    const totalCoins = await getTotalCoins(user.id);
+    console.log('[Mock Auth] Token created for user:', user.email);
 
     const response = NextResponse.json({
       success: true,
@@ -85,16 +91,23 @@ export async function POST(request: Request) {
         image: user.image,
         coins: totalCoins,
       },
+      token, // 返回token供客户端使用
     });
 
-    // 设置 NextAuth session cookie
-    response.cookies.set('next-auth.session-token', token, {
+    // 设置 NextAuth session cookie - 使用正确的配置
+    // 开发环境使用 __Secure-next-auth.session-token 或 next-auth.session-token
+    response.cookies.set({
+      name: 'next-auth.session-token',
+      value: token,
       httpOnly: true,
-      secure: false, // 开发环境使用 http
+      secure: false, // 开发环境不使用 HTTPS
       sameSite: 'lax',
-      maxAge: 30 * 24 * 60 * 60, // 30 days
       path: '/',
+      maxAge: 30 * 24 * 60 * 60, // 30 days
+      domain: 'localhost', // 明确设置 domain
     });
+
+    console.log('[Mock Auth] Cookie set, returning response');
 
     return response;
   } catch (error) {
