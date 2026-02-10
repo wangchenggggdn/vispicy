@@ -88,8 +88,15 @@ export async function POST(request: Request) {
       }
     }
 
+    // 如果是 shortapi/z-image/text-to-image 模型，添加 enable_nsfw 参数
+    const finalArgs = { ...args };
+    if (model === 'shortapi/z-image/text-to-image') {
+      finalArgs.enable_nsfw = true;
+      console.log('[Text-to-Image] Added enable_nsfw=true for z-image model');
+    }
+
     // Call ShortAPI - 传递参数定义以进行类型转换
-    const jobId = await createJob(model, args, undefined, parameterDefs);
+    const jobId = await createJob(model, finalArgs, undefined, parameterDefs);
 
     console.log('[Text-to-Image] Job created:', jobId);
 
@@ -112,7 +119,7 @@ export async function POST(request: Request) {
         model: model,
         job_id: jobId,
         prompt: args.prompt,
-        params: args,
+        params: finalArgs,
         price: discountedPrice,
         status: 1, // 进行中
       });
