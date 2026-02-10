@@ -140,15 +140,23 @@ export const authOptions: NextAuthOptions = {
 
       // Apple Sign In 特殊处理
       if (account?.provider === 'apple') {
-        console.log('[Auth] Apple Sign In detected');
+        console.log('[Auth] ========================================');
+        console.log('[Auth] 🍎 Apple Sign In detected');
+        console.log('[Auth] ========================================');
+        console.log('[Auth] 📱 Full Account object:', JSON.stringify(account, null, 2));
+        console.log('[Auth] 👤 Full Profile object:', JSON.stringify(profile, null, 2));
+        console.log('[Auth] 📧 User object:', JSON.stringify(user, null, 2));
 
         // Apple 返回的 email 可能为空（用户选择隐藏）
         // profile.sub 是 Apple 的唯一用户 ID
         const appleId = profile?.sub;
         const appleEmail = profile?.email || user?.email;
 
-        console.log('[Auth] Apple ID:', appleId);
-        console.log('[Auth] Apple Email:', appleEmail);
+        console.log('[Auth] 🔍 Extracted Apple ID:', appleId);
+        console.log('[Auth] 🔍 Extracted Apple Email:', appleEmail);
+        console.log('[Auth] 🔍 Profile email:', profile?.email);
+        console.log('[Auth] 🔍 User email:', user?.email);
+        console.log('[Auth] ========================================');
 
         if (!appleEmail) {
           console.error('[Auth] Apple Sign In: No email provided by user');
