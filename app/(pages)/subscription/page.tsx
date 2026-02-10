@@ -6,6 +6,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { Check, X, Coins, Zap, Crown, Star, ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
 import LoginModal from '@/components/LoginModal';
+import Footer from '@/components/Footer';
 
 export const dynamic = 'force-dynamic';
 
@@ -480,6 +481,9 @@ export default function SubscriptionPage() {
 
       {/* Login Modal */}
       <LoginModal isOpen={showLoginModal} onClose={() => setShowLoginModal(false)} />
+
+      {/* Footer */}
+      <Footer />
     </div>
   );
 }
