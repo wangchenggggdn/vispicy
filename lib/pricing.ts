@@ -106,6 +106,17 @@ export const PRICING_RULES: PricingRules = {
         '10_1080p': 1000,
       },
     },
+    'vidu/vidu-q3/image-to-video': {
+      basePrice: 1000,
+      priceMap: {
+        '5_720p': 1000,
+        '5_1080p': 1200,
+        '10_720p': 1600,
+        '10_1080p': 1800,
+        '15_720p': 2000,
+        '15_1080p': 2200,
+      },
+    },
   },
 
   // 多图生视频定价
