@@ -203,11 +203,11 @@ export default function SubscriptionPage() {
       {/* Header */}
       <div className="container mx-auto px-4 py-6">
         <Link
-          href="/user"
+          href="/"
           className="inline-flex items-center text-gray-600 hover:text-red-600 transition mb-8"
         >
           <ArrowLeft className="w-4 h-4 mr-2" />
-          Back to Account
+          Back to Home
         </Link>
 
         <div className="text-center mb-12">
