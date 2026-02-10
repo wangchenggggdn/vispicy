@@ -34,6 +34,11 @@ export const PRICING_RULES: PricingRules = {
       unitPrice: 20, // 每张额外图片
       unitParam: 'num_images',
     },
+    'shortapi/z-image/text-to-image': {
+      basePrice: 100,
+      unitPrice: 20, // 每张额外图片
+      unitParam: 'num_images',
+    },
   },
 
   // 图生图定价
