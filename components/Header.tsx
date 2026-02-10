@@ -54,6 +54,9 @@ export default function Header() {
             <Link href="/image-to-video" className="text-gray-700 hover:text-red-600 transition text-sm whitespace-nowrap">
               Image to Video
             </Link>
+            <Link href="/blog" className="text-gray-700 hover:text-red-600 transition text-sm whitespace-nowrap">
+              Blog
+            </Link>
           </div>
           <div className="w-px h-6 bg-gray-300"></div>
 
