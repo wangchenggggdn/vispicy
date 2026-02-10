@@ -1,0 +1,28 @@
+[build]
+  command = "npm run build"
+  publish = ".next"
+
+[build.environment]
+  NODE_VERSION = "18"
+
+[[plugins]]
+  package = "@netlify/plugin-nextjs"
+
+# Redirect default Netlify domain to custom domain
+[[redirects]]
+  from = "https://vispicy.netlify.app/*"
+  to = "https://vispicy.com/:splat"
+  status = 301
+  force = true
+
+# Force HTTPS
+[[redirects]]
+  from = "http://vispicy.com/*"
+  to = "https://vispicy.com/:splat"
+  status = 301
+  force = true
+
+[dev]
+  command = "npm run dev"
+  port = 3000
+  targetPort = 3000

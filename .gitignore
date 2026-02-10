@@ -22,3 +22,8 @@ docs/
 
 # Exclude Apple Sign In generation scripts
 generate-apple*.js
+.vercel
+
+# Local Netlify folder
+.netlify
+.env*.local

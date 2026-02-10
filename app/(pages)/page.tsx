@@ -2,7 +2,6 @@
 
 import Link from 'next/link';
 import { ImageIcon, VideoIcon, Sparkles, Zap, Shield, CheckCircle2 } from 'lucide-react';
-import Header from '@/components/Header';
 
 export const dynamic = 'force-dynamic';
 
@@ -81,8 +80,6 @@ export default function Home() {
       />
 
       <div className="min-h-screen bg-gradient-to-br from-red-50 via-white to-orange-50">
-        <Header />
-
         {/* Hero Section - Semantic HTML with SEO keywords */}
         <header className="container mx-auto px-4 py-20">
           <div className="text-center mb-16">
