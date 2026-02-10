@@ -420,6 +420,101 @@ export default function Home() {
               </div>
             </div>
           </section>
+
+          {/* Blog Section */}
+          <section className="container mx-auto px-4 py-16 bg-gradient-to-br from-orange-50 to-red-50" aria-labelledby="blog-heading">
+            <div className="text-center mb-12">
+              <h2 id="blog-heading" className="text-3xl font-bold text-gray-900 mb-4">
+                Latest from Our Blog
+              </h2>
+              <p className="text-gray-600 max-w-2xl mx-auto">
+                Stay updated with AI trends, tutorials, and creative inspiration from the Vispicy team.
+              </p>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto">
+              {/* Blog Post 1 */}
+              <article className="bg-white rounded-xl shadow-lg hover:shadow-xl transition overflow-hidden group">
+                <div className="h-48 bg-gradient-to-br from-purple-400 to-pink-500 group-hover:scale-105 transition duration-300"></div>
+                <div className="p-6">
+                  <div className="flex items-center gap-2 text-sm text-gray-500 mb-3">
+                    <span>Tutorial</span>
+                    <span>•</span>
+                    <span>5 min read</span>
+                  </div>
+                  <h3 className="text-xl font-bold text-gray-900 mb-3 group-hover:text-red-600 transition">
+                    Getting Started with AI Image Generation
+                  </h3>
+                  <p className="text-gray-600 mb-4 line-clamp-2">
+                    Learn how to create stunning AI-generated images with our comprehensive beginner's guide.
+                  </p>
+                  <Link
+                    href="/blog"
+                    className="inline-flex items-center text-red-600 font-semibold hover:text-red-700 transition"
+                  >
+                    Read More →
+                  </Link>
+                </div>
+              </article>
+
+              {/* Blog Post 2 */}
+              <article className="bg-white rounded-xl shadow-lg hover:shadow-xl transition overflow-hidden group">
+                <div className="h-48 bg-gradient-to-br from-blue-400 to-cyan-500 group-hover:scale-105 transition duration-300"></div>
+                <div className="p-6">
+                  <div className="flex items-center gap-2 text-sm text-gray-500 mb-3">
+                    <span>Tips & Tricks</span>
+                    <span>•</span>
+                    <span>3 min read</span>
+                  </div>
+                  <h3 className="text-xl font-bold text-gray-900 mb-3 group-hover:text-red-600 transition">
+                    10 Tips for Better AI Video Generation
+                  </h3>
+                  <p className="text-gray-600 mb-4 line-clamp-2">
+                    Master the art of AI video creation with these expert tips and techniques.
+                  </p>
+                  <Link
+                    href="/blog"
+                    className="inline-flex items-center text-red-600 font-semibold hover:text-red-700 transition"
+                  >
+                    Read More →
+                  </Link>
+                </div>
+              </article>
+
+              {/* Blog Post 3 */}
+              <article className="bg-white rounded-xl shadow-lg hover:shadow-xl transition overflow-hidden group">
+                <div className="h-48 bg-gradient-to-br from-green-400 to-teal-500 group-hover:scale-105 transition duration-300"></div>
+                <div className="p-6">
+                  <div className="flex items-center gap-2 text-sm text-gray-500 mb-3">
+                    <span>Case Study</span>
+                    <span>•</span>
+                    <span>7 min read</span>
+                  </div>
+                  <h3 className="text-xl font-bold text-gray-900 mb-3 group-hover:text-red-600 transition">
+                    How Creators Are Using AI Tools
+                  </h3>
+                  <p className="text-gray-600 mb-4 line-clamp-2">
+                    Discover how real creators are leveraging AI to streamline their creative workflows.
+                  </p>
+                  <Link
+                    href="/blog"
+                    className="inline-flex items-center text-red-600 font-semibold hover:text-red-700 transition"
+                  >
+                    Read More →
+                  </Link>
+                </div>
+              </article>
+            </div>
+
+            <div className="text-center mt-12">
+              <Link
+                href="/blog"
+                className="inline-flex items-center px-8 py-3 bg-red-600 text-white font-semibold rounded-lg hover:bg-red-700 transition shadow-lg hover:shadow-xl"
+              >
+                View All Posts
+              </Link>
+            </div>
+          </section>
         </main>
 
         {/* Footer - Semantic HTML */}
