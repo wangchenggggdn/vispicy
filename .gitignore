@@ -27,3 +27,4 @@ generate-apple*.js
 # Local Netlify folder
 .netlify
 .env*.local
+需求文档
