@@ -1,13 +1,11 @@
 'use client';
 
 import Link from 'next/link';
-import Header from '@/components/Header';
 import { Sparkles, Users, Target, Eye, HeartHandshake, Shield, Award } from 'lucide-react';
 
 export default function AboutPage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-red-50 via-white to-orange-50">
-      <Header />
       <main>
         {/* Hero Section */}
         <section className="container mx-auto px-4 py-20">

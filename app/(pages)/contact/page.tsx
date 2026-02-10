@@ -2,7 +2,6 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import Header from '@/components/Header';
 import { Mail, MessageSquare, Send, MapPin, Phone, Clock, Github, Twitter, Linkedin } from 'lucide-react';
 
 export default function ContactPage() {
@@ -118,8 +117,6 @@ export default function ContactPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-red-50 via-white to-orange-50">
-      <Header />
-
       <main>
         {/* Hero Section */}
         <section className="container mx-auto px-4 py-20">

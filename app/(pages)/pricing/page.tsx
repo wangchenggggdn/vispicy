@@ -2,7 +2,6 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import Header from '@/components/Header';
 import { Check, X, Coins, Zap, Crown, Star, ArrowRight, Sparkles } from 'lucide-react';
 
 export default function PricingPage() {
@@ -92,8 +91,6 @@ export default function PricingPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-red-50 via-white to-orange-50">
-      <Header />
-
       <main>
         {/* Hero Section */}
         <section className="container mx-auto px-4 py-20">
