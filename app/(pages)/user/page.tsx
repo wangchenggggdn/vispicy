@@ -4,7 +4,7 @@ import { useSession, signOut, getSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import useSWR from 'swr';
-import { User, Coins, History, Calendar, CreditCard, ImageIcon, Video, ExternalLink, X, Download } from 'lucide-react';
+import { User, Coins, History, Calendar, CreditCard, ImageIcon, Video, ExternalLink, X, Download, Gift } from 'lucide-react';
 import { formatDate, getSubscriptionLabel, getSubscriptionStatus } from '@/lib/utils';
 import { useEffect, useRef, useState } from 'react';
 import SubscriptionModal from '@/components/SubscriptionModal';
@@ -64,6 +64,42 @@ export default function UserPage() {
     session?.user ? '/api/orders' : null,
     fetcher
   );
+
+  const { data: checkinData, mutate: mutateCheckin } = useSWR(
+    session?.user ? '/api/user/checkin' : null,
+    fetcher
+  );
+  const [isCheckingIn, setIsCheckingIn] = useState(false);
+
+  // 处理签到
+  const handleCheckIn = async () => {
+    if (isCheckingIn || !checkinData) return;
+
+    setIsCheckingIn(true);
+    try {
+      const response = await fetch('/api/user/checkin', {
+        method: 'POST',
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        alert(error.error || 'Check-in failed');
+        return;
+      }
+
+      const data = await response.json();
+      alert(`🎉 Check-in successful! Day ${data.dayNumber}: +${data.coinsReward} coins`);
+
+      // 刷新签到状态和金币
+      mutateCheckin();
+      window.dispatchEvent(new CustomEvent('coins-update'));
+    } catch (error: any) {
+      console.error('Check-in error:', error);
+      alert('Check-in failed: ' + error.message);
+    } finally {
+      setIsCheckingIn(false);
+    }
+  };
 
   const { data: historyData, isLoading: historyLoading, mutate: mutateHistory } = useSWR(
     session?.user ? '/api/user/history' : null,
@@ -295,6 +331,78 @@ Sign Out
             </Link>
           </div>
         </div>
+
+        {/* Daily Check-in Section */}
+        {checkinData && (
+          <div className="bg-gradient-to-br from-orange-50 to-yellow-50 rounded-xl shadow-sm p-6 mt-6">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-xl font-bold flex items-center text-gray-900">
+                <Gift className="w-6 h-6 mr-2 text-orange-600" />
+                Daily Check-in Rewards
+              </h2>
+              {!checkinData.hasCheckedToday && (
+                <button
+                  onClick={handleCheckIn}
+                  disabled={isCheckingIn}
+                  className="px-6 py-2 bg-gradient-to-r from-orange-500 to-yellow-500 text-white font-semibold rounded-lg hover:from-orange-600 hover:to-yellow-600 transition disabled:opacity-50 disabled:cursor-not-allowed shadow-md"
+                >
+                  {isCheckingIn ? 'Checking in...' : 'Check In Now'}
+                </button>
+              )}
+              {checkinData.hasCheckedToday && (
+                <div className="px-4 py-2 bg-green-100 text-green-700 font-semibold rounded-lg">
+                  ✓ Checked in today!
+                </div>
+              )}
+            </div>
+
+            {/* 7天签到进度 */}
+            <div className="grid grid-cols-7 gap-2">
+              {[1, 2, 3, 4, 5, 6, 7].map((day) => {
+                const isChecked = checkinData.checkedDays?.includes(day);
+                const isToday = day === checkinData.nextDay && !checkinData.hasCheckedToday;
+                const reward = checkinData.rewards?.[day - 1] || 0;
+
+                return (
+                  <div
+                    key={day}
+                    className={`
+                      relative rounded-lg p-3 text-center transition
+                      ${isChecked
+                        ? 'bg-gradient-to-br from-green-400 to-green-500 text-white'
+                        : isToday
+                          ? 'bg-gradient-to-br from-orange-400 to-yellow-400 text-white'
+                          : 'bg-white text-gray-400'
+                      }
+                    `}
+                  >
+                    <div className="text-xs font-medium mb-1">Day {day}</div>
+                    <div className="text-sm font-bold">{reward}</div>
+                    <div className="text-xs">coins</div>
+                    {isChecked && (
+                      <div className="absolute top-1 right-1">✓</div>
+                    )}
+                    {isToday && (
+                      <div className="absolute -top-1 -right-1">
+                        <span className="flex h-3 w-3">
+                          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-orange-400 opacity-75"></span>
+                          <span className="relative inline-flex rounded-full h-3 w-3 bg-orange-500"></span>
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+
+            {/* 下一次奖励提示 */}
+            {!checkinData.hasCheckedToday && (
+              <div className="mt-4 text-sm text-gray-600 text-center">
+                Next reward: <span className="font-bold text-orange-600">+{checkinData.rewards?.[checkinData.nextDay - 1]} coins</span>
+              </div>
+            )}
+          </div>
+        )}
 
         {/* Generation History Section */}
         <div className="bg-white rounded-xl shadow-sm p-6 mt-6">

@@ -524,3 +524,97 @@ export async function createContactMessage(messageData: {
   if (error) throw error;
   return data;
 }
+
+// Check-in functions
+const DAILY_REWARDS = [20, 50, 100, 60, 80, 50, 120]; // 7天奖励配置
+
+// 获取用户本周签到记录
+export async function getUserWeeklyCheckins(userId: string) {
+  const admin = getSupabaseAdmin();
+  const { data, error } = await admin
+    .from('daily_checkins')
+    .select('*')
+    .eq('user_id', userId)
+    .order('checkin_date', { ascending: false })
+    .limit(7);
+
+  if (error) throw error;
+  return data;
+}
+
+// 获取用户今天的签到状态
+export async function getTodayCheckinStatus(userId: string) {
+  const admin = getSupabaseAdmin();
+  const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD
+
+  const { data, error } = await admin
+    .from('daily_checkins')
+    .select('*')
+    .eq('user_id', userId)
+    .eq('checkin_date', today)
+    .maybeSingle();
+
+  if (error) throw error;
+  return data;
+}
+
+// 执行签到
+export async function performDailyCheckin(userId: string) {
+  const admin = getSupabaseAdmin();
+
+  // 检查今天是否已签到
+  const today = new Date().toISOString().split('T')[0];
+  const existingCheckin = await getTodayCheckinStatus(userId);
+  if (existingCheckin) {
+    throw new Error('Already checked in today');
+  }
+
+  // 获取本周签到记录，计算今天是第几天
+  const weeklyCheckins = await getUserWeeklyCheckins(userId);
+  const checkedDays = weeklyCheckins.map(c => c.day_number);
+  let nextDay = 1;
+
+  // 找到第一个未签到的天数
+  for (let i = 1; i <= 7; i++) {
+    if (!checkedDays.includes(i)) {
+      nextDay = i;
+      break;
+    }
+  }
+
+  // 如果7天都签完了，重新开始
+  if (checkedDays.length >= 7) {
+    nextDay = 1;
+  }
+
+  const coinsReward = DAILY_REWARDS[nextDay - 1];
+
+  // 开始事务
+  // 1. 创建签到记录
+  const { data: checkinData, error: checkinError } = await admin
+    .from('daily_checkins')
+    .insert({
+      user_id: userId,
+      checkin_date: today,
+      day_number: nextDay,
+      coins_rewarded: coinsReward,
+    })
+    .select()
+    .single();
+
+  if (checkinError) throw checkinError;
+
+  // 2. 增加用户金币
+  await addCoins(userId, 'coins', coinsReward);
+
+  return {
+    dayNumber: nextDay,
+    coinsReward,
+    checkin: checkinData,
+  };
+}
+
+// 获取签到奖励配置
+export function getDailyRewards() {
+  return DAILY_REWARDS;
+}
