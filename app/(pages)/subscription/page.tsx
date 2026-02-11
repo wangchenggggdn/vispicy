@@ -211,10 +211,10 @@ export default function SubscriptionPage() {
         </Link>
 
         <div className="text-center mb-12">
-          <h1 className="text-4xl md:text-5xl font-bold mb-4">
-            Get More Coins
+          <h1 className="text-3xl md:text-4xl font-bold mb-2">
+            Get More Coins & Features, Unlimited Creation
           </h1>
-          <p className="text-xl text-gray-600">
+          <p className="text-base text-gray-600">
             Unlock premium features and become a Pro member
           </p>
         </div>

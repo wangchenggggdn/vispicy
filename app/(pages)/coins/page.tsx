@@ -129,9 +129,32 @@ export default function CoinsPage() {
           <h1 className="text-3xl md:text-4xl font-bold mb-2">
             Buy Coins
           </h1>
-          <p className="text-base text-gray-600">
+          <p className="text-base text-gray-600 mb-4">
             Get more coins to create amazing AI content
           </p>
+
+          {/* Upgrade to Max Card */}
+          <Link
+            href="/subscription"
+            className="inline-block max-w-2xl w-full mx-auto bg-gradient-to-r from-purple-300 via-pink-300 to-red-300 rounded-xl p-5 text-white shadow-lg hover:shadow-xl transition transform hover:scale-[1.02]"
+          >
+            <div className="flex items-center justify-between">
+              <div className="text-left">
+                <h3 className="text-xl font-bold mb-1 flex items-center gap-2 text-gray-900">
+                  <span className="text-2xl">⭐</span>
+                  Upgrade to Max
+                </h3>
+                <p className="text-sm text-gray-700">
+                  Unlock all AI features, unlimited creation
+                </p>
+              </div>
+              <div className="flex-shrink-0 bg-white/50 rounded-full p-3">
+                <svg className="w-6 h-6 text-gray-900" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                </svg>
+              </div>
+            </div>
+          </Link>
         </div>
 
         {/* Main Content */}
