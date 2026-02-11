@@ -8,10 +8,12 @@ import Link from 'next/link';
 import useSWR from 'swr';
 import ModelParamsForm from '@/components/ModelParamsForm';
 import LoginModal from '@/components/LoginModal';
+import InsufficientCoinsModal from '@/components/InsufficientCoinsModal';
 import { AIModel } from '@/types';
 import { calculatePrice } from '@/lib/pricing';
 import { triggerCoinsUpdate } from '@/hooks/use-coins';
 import { useDiscountedPrice } from '@/hooks/use-discounted-price';
+import { useCoins } from '@/hooks/use-coins';
 
 interface GenerationResult {
   urls: string[];
@@ -26,6 +28,7 @@ export default function TextToImagePage() {
   const { data: session, status } = useSession();
   const router = useRouter();
   const { calculateDiscountedPrice } = useDiscountedPrice();
+  const { coins } = useCoins(30); // 30秒刷新一次
   const [prompt, setPrompt] = useState('');
   const [negativePrompt, setNegativePrompt] = useState('');
   const [selectedModel, setSelectedModel] = useState('');
@@ -36,6 +39,7 @@ export default function TextToImagePage() {
   const [jobId, setJobId] = useState<string | null>(null);
   const [viewingImage, setViewingImage] = useState<string | null>(null);
   const [showLoginModal, setShowLoginModal] = useState(false);
+  const [showInsufficientCoinsModal, setShowInsufficientCoinsModal] = useState(false);
 
   // 获取文生图模型列表
   const { data: models } = useSWR<AIModel[]>('/api/models?type=text2image', fetcher);
@@ -161,6 +165,12 @@ export default function TextToImagePage() {
 
     if (!prompt.trim()) {
       setError('Please enter a prompt');
+      return;
+    }
+
+    // 检查金币是否足够
+    if (coins !== null && calculatedPrice > coins) {
+      setShowInsufficientCoinsModal(true);
       return;
     }
 
@@ -441,6 +451,14 @@ export default function TextToImagePage() {
 
       {/* Login Modal */}
       <LoginModal isOpen={showLoginModal} onClose={() => setShowLoginModal(false)} />
+
+      {/* Insufficient Coins Modal */}
+      <InsufficientCoinsModal
+        isOpen={showInsufficientCoinsModal}
+        onClose={() => setShowInsufficientCoinsModal(false)}
+        requiredCoins={calculatedPrice}
+        currentCoins={coins || 0}
+      />
     </div>
   );
 }

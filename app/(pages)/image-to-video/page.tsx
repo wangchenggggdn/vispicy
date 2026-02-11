@@ -8,12 +8,14 @@ import Link from 'next/link';
 import useSWR from 'swr';
 import ModelParamsForm from '@/components/ModelParamsForm';
 import LoginModal from '@/components/LoginModal';
+import InsufficientCoinsModal from '@/components/InsufficientCoinsModal';
 import SmoothChiliLoading from '@/components/SmoothChiliLoading';
 import { AIModel } from '@/types';
 import { calculatePrice } from '@/lib/pricing';
 import { triggerCoinsUpdate } from '@/hooks/use-coins';
 import { uploadToLitterbox } from '@/lib/litterbox';
 import { useDiscountedPrice } from '@/hooks/use-discounted-price';
+import { useCoins } from '@/hooks/use-coins';
 
 export const dynamic = 'force-dynamic';
 
@@ -23,6 +25,7 @@ export default function ImageToVideoPage() {
   const { data: session } = useSession();
   const router = useRouter();
   const { calculateDiscountedPrice } = useDiscountedPrice();
+  const { coins } = useCoins(30); // 30秒刷新一次
 
   // Tab切换：单图模式 vs 多图模式
   const [activeTab, setActiveTab] = useState<'single' | 'multi'>('single');
@@ -44,6 +47,7 @@ export default function ImageToVideoPage() {
 
   const [jobId, setJobId] = useState<string | null>(null);
   const [showLoginModal, setShowLoginModal] = useState(false);
+  const [showInsufficientCoinsModal, setShowInsufficientCoinsModal] = useState(false);
 
   // 获取Image to Video模型列表（包括单图和多图）
   const { data: models } = useSWR<AIModel[]>('/api/models/image-to-video', fetcher);
@@ -246,6 +250,12 @@ export default function ImageToVideoPage() {
         setError(`Maximum ${maxImagesCount} images allowed`);
         return;
       }
+    }
+
+    // 检查金币是否足够
+    if (coins !== null && calculatedPrice > coins) {
+      setShowInsufficientCoinsModal(true);
+      return;
     }
 
     setLoading(true);
@@ -626,6 +636,14 @@ export default function ImageToVideoPage() {
 
       {/* Login Modal */}
       <LoginModal isOpen={showLoginModal} onClose={() => setShowLoginModal(false)} />
+
+      {/* Insufficient Coins Modal */}
+      <InsufficientCoinsModal
+        isOpen={showInsufficientCoinsModal}
+        onClose={() => setShowInsufficientCoinsModal(false)}
+        requiredCoins={calculatedPrice}
+        currentCoins={coins || 0}
+      />
     </div>
   );
 }

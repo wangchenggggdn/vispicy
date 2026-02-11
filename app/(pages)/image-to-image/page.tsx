@@ -7,11 +7,13 @@ import Link from 'next/link';
 import useSWR from 'swr';
 import ModelParamsForm from '@/components/ModelParamsForm';
 import LoginModal from '@/components/LoginModal';
+import InsufficientCoinsModal from '@/components/InsufficientCoinsModal';
 import { AIModel } from '@/types';
 import { calculatePrice } from '@/lib/pricing';
 import { triggerCoinsUpdate } from '@/hooks/use-coins';
 import { uploadToLitterbox } from '@/lib/litterbox';
 import { useDiscountedPrice } from '@/hooks/use-discounted-price';
+import { useCoins } from '@/hooks/use-coins';
 
 interface GenerationResult {
   urls: string[];
@@ -25,6 +27,7 @@ const fetcher = (url: string) => fetch(url).then((res) => res.json());
 export default function ImageToImagePage() {
   const { data: session } = useSession();
   const { calculateDiscountedPrice } = useDiscountedPrice();
+  const { coins } = useCoins(30); // 30秒刷新一次
   const [prompt, setPrompt] = useState('');
   const [selectedModel, setSelectedModel] = useState('');
   const [modelParams, setModelParams] = useState<Record<string, any>>({});
@@ -36,6 +39,7 @@ export default function ImageToImagePage() {
   const [jobId, setJobId] = useState<string | null>(null);
   const [viewingImage, setViewingImage] = useState<string | null>(null);
   const [showLoginModal, setShowLoginModal] = useState(false);
+  const [showInsufficientCoinsModal, setShowInsufficientCoinsModal] = useState(false);
 
   // 获取图生图模型列表
   const { data: models } = useSWR<AIModel[]>('/api/models?type=image2image', fetcher);
@@ -163,6 +167,12 @@ export default function ImageToImagePage() {
 
     if (!prompt.trim() || !sourceImage) {
       setError('Please enter a prompt and upload a reference image');
+      return;
+    }
+
+    // 检查金币是否足够
+    if (coins !== null && calculatedPrice > coins) {
+      setShowInsufficientCoinsModal(true);
       return;
     }
 
@@ -478,6 +488,14 @@ export default function ImageToImagePage() {
 
       {/* Login Modal */}
       <LoginModal isOpen={showLoginModal} onClose={() => setShowLoginModal(false)} />
+
+      {/* Insufficient Coins Modal */}
+      <InsufficientCoinsModal
+        isOpen={showInsufficientCoinsModal}
+        onClose={() => setShowInsufficientCoinsModal(false)}
+        requiredCoins={calculatedPrice}
+        currentCoins={coins || 0}
+      />
     </div>
   );
 }

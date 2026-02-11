@@ -8,11 +8,13 @@ import Link from 'next/link';
 import useSWR from 'swr';
 import ModelParamsForm from '@/components/ModelParamsForm';
 import LoginModal from '@/components/LoginModal';
+import InsufficientCoinsModal from '@/components/InsufficientCoinsModal';
 import SmoothChiliLoading from '@/components/SmoothChiliLoading';
 import { AIModel } from '@/types';
 import { calculatePrice } from '@/lib/pricing';
 import { triggerCoinsUpdate } from '@/hooks/use-coins';
 import { useDiscountedPrice } from '@/hooks/use-discounted-price';
+import { useCoins } from '@/hooks/use-coins';
 
 export const dynamic = 'force-dynamic';
 
@@ -22,6 +24,7 @@ export default function TextToVideoPage() {
   const { data: session } = useSession();
   const router = useRouter();
   const { calculateDiscountedPrice } = useDiscountedPrice();
+  const { coins } = useCoins(30); // 30秒刷新一次
   const [prompt, setPrompt] = useState('');
   const [selectedModel, setSelectedModel] = useState('');
   const [modelParams, setModelParams] = useState<Record<string, any>>({});
@@ -30,6 +33,7 @@ export default function TextToVideoPage() {
   const [error, setError] = useState('');
   const [jobId, setJobId] = useState<string | null>(null);
   const [showLoginModal, setShowLoginModal] = useState(false);
+  const [showInsufficientCoinsModal, setShowInsufficientCoinsModal] = useState(false);
 
   // 获取Text to Video模型列表
   const { data: models } = useSWR<AIModel[]>('/api/models?type=text2video', fetcher);
@@ -139,6 +143,12 @@ export default function TextToVideoPage() {
 
     if (!selectedModel) {
       setError('Please select a model');
+      return;
+    }
+
+    // 检查金币是否足够
+    if (coins !== null && calculatedPrice > coins) {
+      setShowInsufficientCoinsModal(true);
       return;
     }
 
@@ -373,6 +383,14 @@ export default function TextToVideoPage() {
 
       {/* Login Modal */}
       <LoginModal isOpen={showLoginModal} onClose={() => setShowLoginModal(false)} />
+
+      {/* Insufficient Coins Modal */}
+      <InsufficientCoinsModal
+        isOpen={showInsufficientCoinsModal}
+        onClose={() => setShowInsufficientCoinsModal(false)}
+        requiredCoins={calculatedPrice}
+        currentCoins={coins || 0}
+      />
     </div>
   );
 }
