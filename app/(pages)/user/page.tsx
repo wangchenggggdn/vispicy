@@ -70,6 +70,8 @@ export default function UserPage() {
     fetcher
   );
   const [isCheckingIn, setIsCheckingIn] = useState(false);
+  const [showCheckinSuccess, setShowCheckinSuccess] = useState(false);
+  const [checkinSuccessData, setCheckinSuccessData] = useState<{ dayNumber: number; coinsReward: number } | null>(null);
 
   // 处理签到
   const handleCheckIn = async () => {
@@ -88,7 +90,8 @@ export default function UserPage() {
       }
 
       const data = await response.json();
-      alert(`🎉 Check-in successful! Day ${data.dayNumber}: +${data.coinsReward} coins`);
+      setCheckinSuccessData({ dayNumber: data.dayNumber, coinsReward: data.coinsReward });
+      setShowCheckinSuccess(true);
 
       // 刷新签到状态和金币
       mutateCheckin();
@@ -406,10 +409,13 @@ Sign Out
 
         {/* Generation History Section */}
         <div className="bg-white rounded-xl shadow-sm p-6 mt-6">
-          <h2 className="text-xl font-bold mb-4 flex items-center">
-            <History className="w-6 h-6 mr-2 text-purple-600" />
-            Generation History
-          </h2>
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-xl font-bold flex items-center">
+              <History className="w-6 h-6 mr-2 text-purple-600" />
+              Generation History
+            </h2>
+            <span className="text-sm text-gray-500">Retained for 24 hours</span>
+          </div>
 
           {historyLoading ? (
             <div className="text-center py-8 text-gray-500">Loading...</div>
@@ -608,6 +614,45 @@ Sign Out
         }}
         currentBalance={coins || 0}
       />
+
+      {/* Check-in Success Modal */}
+      {showCheckinSuccess && checkinSuccessData && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4 modal-backdrop-animate">
+          <div className="bg-white rounded-2xl max-w-md w-full p-6 text-center modal-content-animate">
+            {/* 成功文字 */}
+            <h2 className="text-3xl font-bold text-gray-900 mb-1">Check-in Successful!</h2>
+            <p className="text-gray-600 mb-4">
+              Day <span className="font-bold text-orange-600 text-xl">{checkinSuccessData.dayNumber}</span> Completed
+            </p>
+
+            {/* 庆祝动画 - 彩色圆球 */}
+            <div className="flex justify-center items-center space-x-3 mb-5">
+              <div className="confetti-ball confetti-yellow"></div>
+              <div className="confetti-ball confetti-pink" style={{ animationDelay: '0.1s' }}></div>
+              <div className="confetti-ball confetti-blue" style={{ animationDelay: '0.2s' }}></div>
+              <div className="confetti-ball confetti-green" style={{ animationDelay: '0.3s' }}></div>
+              <div className="confetti-ball confetti-purple" style={{ animationDelay: '0.4s' }}></div>
+            </div>
+
+            {/* 奖励展示 */}
+            <div className="bg-gradient-to-r from-yellow-50 via-orange-50 to-yellow-50 rounded-xl p-5 mb-5 reward-box-animate">
+              <div className="flex items-center justify-center space-x-2">
+                <Coins className="w-10 h-10 text-yellow-600" />
+                <span className="text-5xl font-bold text-yellow-600 count-animate">+{checkinSuccessData.coinsReward}</span>
+              </div>
+              <p className="text-sm text-gray-600 mt-2">Coins added to your balance</p>
+            </div>
+
+            {/* 关闭按钮 */}
+            <button
+              onClick={() => setShowCheckinSuccess(false)}
+              className="w-full py-3 bg-gradient-to-r from-orange-500 to-yellow-500 text-white font-semibold rounded-lg hover:from-orange-600 hover:to-yellow-600 transition shadow-lg transform hover:scale-105 active:scale-95"
+            >
+              Awesome!
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
