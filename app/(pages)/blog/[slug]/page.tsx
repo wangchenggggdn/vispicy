@@ -2,17 +2,17 @@
 
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
-import { Calendar, Clock, ArrowLeft, BookOpen, Share2 } from 'lucide-react';
-import Header from '@/components/Header';
+import { Calendar, Clock, ArrowLeft, BookOpen, Share2, Check } from 'lucide-react';
 import { blogPosts } from '@/lib/blog-data';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { useParams } from 'next/navigation';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 
 export default function BlogPostPage() {
   const params = useParams();
   const post = blogPosts.find((p) => p.slug === params.slug);
+  const [copied, setCopied] = useState(false);
 
   if (!post) {
     notFound();
@@ -48,9 +48,35 @@ export default function BlogPostPage() {
     }
   }, [post]);
 
+  // Helper function to copy text to clipboard
+  const copyToClipboard = async (text: string) => {
+    try {
+      await navigator.clipboard.writeText(text);
+      setCopied(true);
+      // Reset copied state after 2 seconds
+      setTimeout(() => setCopied(false), 2000);
+    } catch (err) {
+      // Fallback for older browsers
+      const textArea = document.createElement('textarea');
+      textArea.value = text;
+      textArea.style.position = 'fixed';
+      textArea.style.left = '-999999px';
+      document.body.appendChild(textArea);
+      textArea.focus();
+      textArea.select();
+      try {
+        document.execCommand('copy');
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2000);
+      } catch (err) {
+        console.error('Failed to copy:', err);
+      }
+      document.body.removeChild(textArea);
+    }
+  };
+
   return (
     <>
-      <Header />
       <div className="min-h-screen bg-gradient-to-br from-red-50 via-white to-orange-50">
         <article className="container mx-auto px-4 py-12">
           <div className="max-w-4xl mx-auto">
@@ -104,21 +130,41 @@ export default function BlogPostPage() {
                   </div>
                 </div>
                 <button
-                  onClick={() => {
+                  onClick={async () => {
+                    // Try native share API first (mobile)
                     if (navigator.share) {
-                      navigator.share({
-                        title: post.title,
-                        text: post.excerpt,
-                        url: window.location.href,
-                      });
+                      try {
+                        await navigator.share({
+                          title: post.title,
+                          text: post.excerpt,
+                          url: window.location.href,
+                        });
+                      } catch (err) {
+                        // User cancelled or error - fallback to clipboard
+                        copyToClipboard(window.location.href);
+                      }
                     } else {
-                      navigator.clipboard.writeText(window.location.href);
+                      // Fallback to clipboard
+                      copyToClipboard(window.location.href);
                     }
                   }}
-                  className="flex items-center gap-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg transition text-gray-700"
+                  className={`flex items-center gap-2 px-4 py-2 rounded-lg transition ${
+                    copied
+                      ? 'bg-green-100 text-green-700 hover:bg-green-200'
+                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                  }`}
                 >
-                  <Share2 className="w-4 h-4" />
-                  Share
+                  {copied ? (
+                    <>
+                      <Check className="w-4 h-4" />
+                      Copied!
+                    </>
+                  ) : (
+                    <>
+                      <Share2 className="w-4 h-4" />
+                      Share
+                    </>
+                  )}
                 </button>
               </div>
             </header>
