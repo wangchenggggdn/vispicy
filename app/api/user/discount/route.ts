@@ -13,7 +13,7 @@ export async function GET() {
     // 从数据库获取用户订阅信息
     const user = await getUserById(session.user.id);
     if (!user) {
-      return NextResponse.json({ error: '用户不存在' }, { status: 404 });
+      return NextResponse.json({ error: 'User not found' }, { status: 404 });
     }
 
     const rights_type = (user as any).rights_type;
@@ -25,6 +25,6 @@ export async function GET() {
     });
   } catch (error) {
     console.error('[API] Error fetching discount:', error);
-    return NextResponse.json({ error: '获取折扣信息失败' }, { status: 500 });
+    return NextResponse.json({ error: 'Failed to fetch discount info' }, { status: 500 });
   }
 }

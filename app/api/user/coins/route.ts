@@ -18,6 +18,6 @@ export async function GET(request: NextRequest) {
     });
   } catch (error) {
     console.error('[API] Failed to fetch coins:', error);
-    return NextResponse.json({ error: '获取金币失败' }, { status: 500 });
+    return NextResponse.json({ error: 'Failed to fetch coins' }, { status: 500 });
   }
 }

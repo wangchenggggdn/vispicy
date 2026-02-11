@@ -56,8 +56,8 @@ export default function ContactPage() {
       icon: Mail,
       title: 'Email Us',
       description: 'General inquiries and support',
-      contact: 'vispicy@gmail.com',
-      link: 'mailto:vispicy@gmail.com',
+      contact: 'vispicy.ai@gmail.com',
+      link: 'mailto:vispicy.ai@gmail.com',
     },
     {
       icon: MessageSquare,
@@ -112,7 +112,7 @@ export default function ContactPage() {
     },
     {
       question: 'How do I contact technical support?',
-      answer: 'For technical support, please email vispicy@gmail.com or use the live chat feature on our website. Our support team is available 24/7 to assist you.',
+      answer: 'For technical support, please email vispicy.ai@gmail.com or use the live chat feature on our website. Our support team is available 24/7 to assist you.',
     },
   ];
 

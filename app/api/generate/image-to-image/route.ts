@@ -43,7 +43,7 @@ export async function POST(request: Request) {
     // 获取用户信息
     const user = await getUserById(userId);
     if (!user) {
-      return NextResponse.json({ error: '用户不存在' }, { status: 404 });
+      return NextResponse.json({ error: 'User not found' }, { status: 404 });
     }
 
     // 计算总金币数

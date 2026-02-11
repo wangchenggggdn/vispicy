@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Providers from '@/components/Providers';
 import { Analytics } from '@vercel/analytics/react';
+import Script from 'next/script';
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -71,6 +72,18 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="zh-CN">
+      <head>
+        {/* Google Analytics */}
+        <Script src="https://www.googletagmanager.com/gtag/js?id=G-Y8M0YHJ10J" strategy="afterInteractive" />
+        <Script id="google-analytics" strategy="afterInteractive">
+          {`
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+            gtag('config', 'G-Y8M0YHJ10J');
+          `}
+        </Script>
+      </head>
       <body className="antialiased">
         <Providers>{children}</Providers>
         <Analytics />

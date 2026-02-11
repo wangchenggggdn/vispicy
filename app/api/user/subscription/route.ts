@@ -13,7 +13,7 @@ export async function GET() {
     // 从数据库获取最新用户数据
     const user = await getUserById(session.user.id);
     if (!user) {
-      return NextResponse.json({ error: '用户不存在' }, { status: 404 });
+      return NextResponse.json({ error: 'User not found' }, { status: 404 });
     }
 
     // 检查订阅是否有效
@@ -28,6 +28,6 @@ export async function GET() {
     });
   } catch (error) {
     console.error('[API] Error fetching subscription:', error);
-    return NextResponse.json({ error: '获取订阅信息失败' }, { status: 500 });
+    return NextResponse.json({ error: 'Failed to fetch subscription info' }, { status: 500 });
   }
 }

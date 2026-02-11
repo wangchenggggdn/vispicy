@@ -41,7 +41,7 @@ export default function BlockedPage() {
               Need Assistance?
             </h2>
             <a
-              href="mailto:support@vispicy.com"
+              href="mailto:vispicy.ai@gmail.com"
               className="inline-flex items-center gap-2 px-6 py-3 bg-gray-900 text-white rounded-lg hover:bg-gray-800 transition-colors duration-200"
             >
               <Mail className="w-5 h-5" />
