@@ -20,9 +20,9 @@ export default function PaymentCancelPage() {
     <div className="min-h-screen bg-gray-900 flex items-center justify-center p-4">
       <div className="bg-gray-800 rounded-2xl p-8 max-w-md w-full text-center shadow-xl">
         <XCircle className="w-16 h-16 text-yellow-500 mx-auto mb-4" />
-        <h1 className="text-2xl font-bold text-white mb-2">支付已取消</h1>
-        <p className="text-gray-400 mb-4">您已取消支付，未产生任何费用</p>
-        <p className="text-sm text-gray-500">即将返回首页...</p>
+        <h1 className="text-2xl font-bold text-white mb-2">Payment Cancelled</h1>
+        <p className="text-gray-400 mb-4">You have cancelled the payment. No charges were made.</p>
+        <p className="text-sm text-gray-500">Returning to home page...</p>
       </div>
     </div>
   );

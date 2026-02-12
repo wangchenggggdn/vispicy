@@ -1,258 +1,259 @@
-# ViCraft - AI生成图片与视频工具站
+# Vispicy - AI-Powered Creative Tools Platform
 
-基于Next.js构建的AI内容生成工具站，支持文生图、图生图、文生视频、图片转视频等功能。
+<div align="center">
 
-## 功能特性
+**Transform Your Ideas Into Stunning Visuals with AI**
 
-- **文生图 (Text-to-Image)**: 输入文字描述生成精美图片
-- **图生图 (Image-to-Image)**: 基于参考图片生成新作品
-- **文生视频 (Text-to-Video)**: 文字描述生成短视频
-- **图片转视频 (Image-to-Video)**: 静态图片转化为动态视频
-- **用户系统**: Google OAuth登录，金币管理
-- **订阅系统**: 周订阅和年订阅计划
+[Live Demo](https://vispicy.com) · [Discord](https://discord.gg/hJNnwZpU) · [Contact Us](mailto:vispicy.ai@gmail.com)
 
-## 技术栈
+</div>
 
-- **前端**: Next.js 15, React 19, TypeScript, Tailwind CSS
-- **后端**: Next.js API Routes, Serverless Functions
-- **数据库**: Supabase (PostgreSQL)
-- **鉴权**: NextAuth.js
-- **AI服务**: ShortAPI.ai
-- **部署**: Vercel
+---
 
-## 快速开始
+## 🎨 What is Vispicy?
 
-### 1. 克隆项目
+**Vispicy** is a cutting-edge AI-powered creative platform that enables anyone to generate stunning images and videos from text descriptions or reference images. Whether you're a digital artist, content creator, marketer, or business owner, Vispicy provides the tools you need to bring your creative vision to life in seconds.
 
-```bash
-git clone <repository-url>
-cd vicraft
-```
+---
 
-### 2. 安装依赖
+## ✨ Key Features
 
-```bash
-npm install
-```
+### 🖼️ Text to Image
+Generate high-quality images from text descriptions. Simply describe what you want to see, and our AI creates beautiful, detailed images in multiple styles and resolutions.
 
-### 3. 配置环境变量
+**Perfect for:**
+- Concept art and illustrations
+- Social media graphics
+- Marketing visuals
+- Creative exploration
 
-复制 `.env.example` 到 `.env.local` 并填写配置：
+### 🔄 Image to Image
+Transform and enhance your images with AI. Upload a reference image, describe your desired changes, and watch the magic happen.
 
-```bash
-cp .env.example .env.local
-```
+**Perfect for:**
+- Style transfer
+- Image enhancement
+- Creative variations
+- Artistic transformations
 
-需要配置的环境变量（详细说明见 `.env.example`）：
+### 🎬 Text to Video
+Create dynamic video content from text prompts. Bring your stories to life with AI-generated videos that captivate and engage.
 
-```env
-# Supabase
-NEXT_PUBLIC_SUPABASE_URL=your-supabase-url
-NEXT_PUBLIC_SUPABASE_ANON_KEY=your-supabase-anon-key
+**Perfect for:**
+- Short-form video content
+- Animated marketing materials
+- Creative storytelling
+- Social media videos
 
-# NextAuth.js
-NEXTAUTH_URL=http://localhost:3000
-NEXTAUTH_SECRET=your-nextauth-secret
+### 🎞️ Image to Video
+Animate your static images and turn them into dynamic videos. Perfect for social media, marketing, and creative projects.
 
-# Google OAuth
-GOOGLE_CLIENT_ID=your-google-client-id
-GOOGLE_CLIENT_SECRET=your-google-client-secret
+**Perfect for:**
+- Photo animation
+- Social media content
+- Product showcases
+- Creative effects
 
-# Apple Sign In
-APPLE_ID=your-apple-services-id
-APPLE_SECRET=your-generated-jwt-token
+---
 
-# ShortAPI
-SHORTAPI_API_KEY=your-shortapi-api-key
+## 🔞 Adult Content Support
 
-# PayPal (Sandbox for development)
-NEXT_PUBLIC_PAYPAL_CLIENT_ID=your-paypal-client-id
-PAYPAL_SECRET=your-paypal-secret
-PAYPAL_API_BASE=https://api-m.sandbox.paypal.com
+**Vispicy fully supports NSFW (Not Safe For Work) and adult content generation** for professional creators and artists who need it.
 
-# App
-NEXT_PUBLIC_APP_URL=http://localhost:3000
-```
+### 🎯 NSFW Features
 
-### 4. 设置数据库
+- ✅ **Full NSFW Support** - Generate adult-oriented images and content without restrictions
+- ✅ **Advanced Content Controls** - Built-in safety options and content filters
+- ✅ **Complete Privacy** - All your creations are private and encrypted
+- ✅ **Judgment-Free Zone** - Creative freedom in a safe environment
+- ✅ **Professional Quality** - High-resolution outputs suitable for professional use
 
-在 Supabase SQL 编辑器中运行 `supabase/migrations/001_initial_schema.sql` 中的SQL脚本。
+### 🛡️ Responsible Usage
 
-### 5. 运行开发服务器
+We support creative freedom while promoting responsible use:
+- Follow all local laws and regulations
+- Respect copyright and intellectual property
+- Create consensual adult content only
+- Use generated content ethically and responsibly
 
-```bash
-npm run dev
-```
+### 💡 How to Generate NSFW Content
 
-访问 [http://localhost:3000](http://localhost:3000)
+Generating adult content on Vispicy is simple and straightforward:
 
-## OAuth 配置
+#### Step-by-Step Guide:
 
-### Google OAuth
+1. **Navigate to Text to Image**
+   - Go to [vispicy.com/text-to-image](https://vispicy.com/text-to-image)
+   - Sign in to your account (or create a free account)
 
-1. 访问 [Google Cloud Console](https://console.cloud.google.com/)
-2. 创建新项目或选择现有项目
-3. 启用 Google+ API
-4. 创建 OAuth 2.0 凭据
-5. 设置授权重定向 URI:
-   - 本地: `http://localhost:3000/api/auth/callback/google`
-   - 生产: `https://vispicy.com/api/auth/callback/google`
-6. 复制 Client ID 和 Client Secret 到环境变量
+2. **Select the Right Model**
+   - Choose **"Vispicy 2.1"** model from the model dropdown
+   - This model is specifically optimized for NSFW content generation
 
-### Apple Sign In
+3. **Enter Your Prompt**
+   - Type your description in the prompt field
+   - **Include NSFW-related keywords** in your prompt
+   - Be descriptive and specific for best results
 
-1. 访问 [Apple Developer](https://developer.apple.com/account/)
-2. 创建 App ID 和 Services ID
-3. 配置回调 URL:
-   - 本地: `http://localhost:3000/api/auth/callback/apple`
-   - 生产: `https://vispicy.com/api/auth/callback/apple`
-4. 创建私钥（.p8文件）
-5. 使用 `generate-apple-secret-auto.js` 生成 APPLE_SECRET
+   **Example prompts:**
+   ```
+   "A beautiful woman in a red dress, evening gown style, photorealistic"
+   "Artistic nude portrait, oil painting style, soft lighting"
+   "Fashion photography, lingerie shoot, studio lighting"
+   ```
 
-**⚠️ 重要**: APPLE_SECRET 有效期为 180 天，到期需重新生成。
+4. **Adjust Settings (Optional)**
+   - Set your preferred resolution (1024x1024 recommended)
+   - Choose additional parameters if available
+   - The Vispicy 2.1 model automatically handles NSFW content
 
-## 项目结构
+5. **Generate & Download**
+   - Click "Generate" button
+   - Wait for processing (usually 10-30 seconds)
+   - Download your creation
 
-```
-vicraft/
-├── app/
-│   ├── (pages)/          # 页面路由组
-│   │   ├── text-to-image/
-│   │   ├── image-to-image/
-│   │   ├── text-to-video/
-│   │   ├── image-to-video/
-│   │   ├── user/
-│   │   └── subscription/
-│   ├── api/              # API路由
-│   │   ├── auth/
-│   │   ├── generate/
-│   │   ├── tasks/
-│   │   ├── orders/
-│   │   ├── subscribe/
-│   │   └── callback/
-│   ├── globals.css
-│   └── layout.tsx
-├── components/           # React组件
-├── lib/                  # 工具函数和配置
-│   ├── supabase.ts
-│   ├── auth.ts
-│   ├── shortapi.ts
-│   └── utils.ts
-├── types/               # TypeScript类型定义
-├── supabase/
-│   └── migrations/      # 数据库迁移文件
-└── public/              # 静态资源
-```
+#### ✅ NSFW Keywords to Use in Prompts
 
-## 数据库表结构
+For best results, include these keywords in your prompts:
+- "nsfw", "adult", "mature"
+- "suggestive", "sensual", "erotic"
+- "lingerie", "intimate", "boudoir"
+- "pinup", "glamour", "artistic nude"
 
-### users (用户表)
-- id: UUID (主键)
-- email: 邮箱
-- name: 姓名
-- image: 头像
-- coins: 金币数量
-- subscription_type: 订阅类型 (weekly/yearly)
-- subscription_expires_at: 订阅过期时间
+**Tips:**
+- Be specific about style (photorealistic, artistic, anime, etc.)
+- Mention lighting and atmosphere
+- Include pose and composition details
+- The more descriptive your prompt, the better the results
 
-### orders (订单表)
-- id: UUID (主键)
-- user_id: 用户ID
-- type: 订单类型 (recharge/subscription/task)
-- amount: 金额
-- coins: 金币数量
-- subscription_type: 订阅类型
-- status: 状态 (pending/completed/failed)
+---
 
-### models (AI模型表)
-- id: UUID (主键)
-- name: 模型名称
-- type: 类型 (text-to-image/image-to-image/text-to-video/image-to-video)
-- api_model: API模型标识
-- price: 价格（金币）
-- parameters: 参数配置
-- active: 是否启用
+## 🎯 Who Uses Vispicy?
 
-### tasks (任务表)
-- id: UUID (主键)
-- user_id: 用户ID
-- model_id: 模型ID
-- type: 类型
-- prompt: 提示词
-- status: 状态 (pending/processing/completed/failed)
-- result_url: 结果URL
-- job_id: ShortAPI任务ID
+### Digital Artists & Illustrators
+- Generate concept art and explore styles
+- Create variations of existing artwork
+- Accelerate the creative process
+- Overcome creative blocks
 
-## API端点
+### Content Creators
+- Produce unique images and videos
+- Create eye-catching social media content
+- Generate thumbnails and cover images
+- Stand out in a crowded digital space
 
-### 认证
-- `POST /api/auth/signin` - 登录
-- `POST /api/auth/signout` - 登出
+### Marketing Teams
+- Create visual campaigns in minutes
+- Design marketing materials at scale
+- Generate ad creatives
+- Test multiple visual concepts quickly
 
-### 生成
-- `POST /api/generate/text-to-image` - 文生图
-- `POST /api/generate/image-to-image` - 图生图
-- `POST /api/generate/text-to-video` - 文生视频
-- `POST /api/generate/image-to-video` - 图片转视频
+### Businesses
+- Professional visuals for presentations
+- Website and marketing graphics
+- Product mockups and demonstrations
+- Cost-effective content production
 
-### 用户
-- `GET /api/tasks` - 获取任务列表
-- `GET /api/orders` - 获取订单列表
-- `POST /api/subscribe` - 创建订阅
+---
 
-### 回调
-- `POST /api/callback` - ShortAPI回调
+## 💰 Pricing
 
-## 金币消耗规则
+### Free Tier
+- **100 free coins** on sign up
+- Access to all AI tools
+- Standard processing speed
+- No credit card required
 
-- 文生图: 1金币/次
-- 图生图: 2金币/次
-- 文生视频: 5金币/次
-- 图片转视频: 5金币/次
+### Subscription Plans
 
-## 部署
+#### Weekly Plan
+- Flexible short-term access
+- Ideal for trying out the platform
+- Weekly coin allocations
+- Cancel anytime
 
-### Netlify 部署（推荐）
+#### Yearly Plan
+- Best value with significant savings
+- Priority processing
+- Monthly coin bonuses
+- Dedicated support
 
-1. 将代码推送到 GitHub
-2. 在 Netlify 中导入项目
-3. 配置环境变量：参考 `NETLIFY_PRODUCTION_CONFIG.txt` 或 `docs/ENVIRONMENT_SETUP.md`
-4. 部署完成
+### Coin Packages
+- Purchase coins as needed
+- No expiration on purchased coins
+- Volume discounts available
+- Multiple payment options
 
-**⚠️ 重要**: 生产环境需要在各平台配置正确的回调 URL（vispicy.com）
+Visit [vispicy.com/pricing](https://vispicy.com/pricing) for detailed pricing information.
 
-### Vercel 部署
+---
 
-1. 将代码推送到 GitHub
-2. 在 Vercel 中导入项目
-3. 配置环境变量
-4. 部署完成
+## 🌟 Why Choose Vispicy?
 
-### 本地生产构建
+### ⚡ Lightning Fast
+Optimized AI processing delivers images in seconds and completes videos quickly, maximizing your creative efficiency.
 
-```bash
-npm run build
-npm start
-```
+### 🎨 High Quality Output
+Powered by advanced AI models including Stable Diffusion XL and Vidu, generating high-resolution images and videos with stunning detail.
 
-### 环境配置文档
+### 🔒 Secure & Private
+Encrypted data transfer protects your privacy. Your creations are stored securely and never shared without permission.
 
-- 📄 **本地开发**: 参考 `.env.example`
-- 🌐 **生产环境**: 参考 `NETLIFY_PRODUCTION_CONFIG.txt` 或 `docs/ENVIRONMENT_SETUP.md`
+### 💪 Easy to Use
+Intuitive interface designed for everyone - no technical skills required. Just type, click, and create.
 
-## 待实现功能
+### 🌍 Available 24/7
+Access our tools anytime, anywhere. Create on your schedule without waiting for business hours.
 
-- [ ] 支付接口集成（微信支付/支付宝）
-- [ ] 图片/视频编辑工具
-- [ ] API接口开放
-- [ ] 任务队列系统（使用Vercel Cron或Background Jobs）
-- [ ] 邮件通知
-- [ ] 管理后台
+---
 
-## 许可证
+## 📊 Platform Highlights
 
-MIT
+- **1,000+** Active Users
+- **50,000+** Creations Made
+- **4** Powerful AI Tools
+- **Multiple** AI Models Available
+- **Daily** Free Coin Rewards
+- **Weekly** & **Yearly** Subscription Options
 
-## 联系方式
+---
 
-如有问题请提交 Issue。
+## 🚀 Getting Started
+
+1. **Sign Up** - Create your free account in seconds
+2. **Get Free Coins** - Receive 100 free coins to start creating
+3. **Choose Your Tool** - Select Text to Image, Image to Image, Text to Video, or Image to Video
+4. **Create** - Enter your prompt and let AI do the work
+5. **Download** - Get your creations instantly
+
+**Start creating today at [vispicy.com](https://vispicy.com)**
+
+---
+
+## 📧 Contact & Support
+
+- **Website**: [https://vispicy.com](https://vispicy.com)
+- **Email**: [vispicy.ai@gmail.com](mailto:vispicy.ai@gmail.com)
+- **Discord**: [Join our community](https://discord.gg/hJNnwZpU)
+- **Support**: Available 24/7 through email and live chat
+
+---
+
+## 🔗 Quick Links
+
+- [Pricing](https://vispicy.com/pricing)
+- [Blog](https://vispicy.com/blog)
+- [About Us](https://vispicy.com/about)
+- [Contact](https://vispicy.com/contact)
+- [Privacy Policy](https://vispicy.com/privacy)
+- [Terms of Service](https://vispicy.com/terms)
+
+---
+
+<div align="center">
+
+**Made with ❤️ by the Vispicy Team**
+
+*Transform your imagination into reality*
+
+</div>

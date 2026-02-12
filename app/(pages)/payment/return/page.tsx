@@ -24,7 +24,7 @@ export default function PaymentReturnPage() {
 
       if (!paypalOrderId) {
         setStatus('error');
-        setMessage('支付参数缺失');
+        setMessage('Payment parameters missing');
         // Redirect to home after 3 seconds
         setTimeout(() => {
           router.push('/');
@@ -43,12 +43,12 @@ export default function PaymentReturnPage() {
         const data = await response.json();
 
         if (!response.ok) {
-          throw new Error(data.error || '支付处理失败');
+          throw new Error(data.error || 'Payment processing failed');
         }
 
         if (data.success) {
           setStatus('success');
-          setMessage(`支付成功！您获得了 ${data.coins?.toLocaleString()} 金币`);
+          setMessage(`Payment successful! You've received ${data.coins?.toLocaleString()} coins`);
 
           // 1. 首先强制刷新 session 从数据库获取最新数据
           console.log('[Payment Return] Refreshing session from database...');
@@ -74,12 +74,12 @@ export default function PaymentReturnPage() {
             router.push('/user');
           }, 2000);
         } else {
-          throw new Error('支付状态未知');
+          throw new Error('Unknown payment status');
         }
       } catch (error) {
         console.error('[Payment Return] Error:', error);
         setStatus('error');
-        setMessage(error instanceof Error ? error.message : '支付处理失败');
+        setMessage(error instanceof Error ? error.message : 'Payment processing failed');
         // Redirect to home after 3 seconds
         setTimeout(() => {
           router.push('/');
@@ -96,26 +96,26 @@ export default function PaymentReturnPage() {
         {status === 'loading' && (
           <>
             <Loader2 className="w-16 h-16 text-blue-500 mx-auto mb-4 animate-spin" />
-            <h1 className="text-2xl font-bold text-white mb-2">处理支付中...</h1>
-            <p className="text-gray-400">请稍候，我们正在确认您的支付</p>
+            <h1 className="text-2xl font-bold text-white mb-2">Processing payment...</h1>
+            <p className="text-gray-400">Please wait while we confirm your payment</p>
           </>
         )}
 
         {status === 'success' && (
           <>
             <CheckCircle className="w-16 h-16 text-green-500 mx-auto mb-4" />
-            <h1 className="text-2xl font-bold text-white mb-2">支付成功！</h1>
+            <h1 className="text-2xl font-bold text-white mb-2">Payment Successful!</h1>
             <p className="text-gray-300 mb-4">{message}</p>
-            <p className="text-sm text-gray-500">即将跳转到用户页面...</p>
+            <p className="text-sm text-gray-500">Redirecting to user page...</p>
           </>
         )}
 
         {status === 'error' && (
           <>
             <XCircle className="w-16 h-16 text-red-500 mx-auto mb-4" />
-            <h1 className="text-2xl font-bold text-white mb-2">支付失败</h1>
+            <h1 className="text-2xl font-bold text-white mb-2">Payment Failed</h1>
             <p className="text-gray-300 mb-4">{message}</p>
-            <p className="text-sm text-gray-500">即将跳转到首页...</p>
+            <p className="text-sm text-gray-500">Redirecting to home page...</p>
           </>
         )}
       </div>
