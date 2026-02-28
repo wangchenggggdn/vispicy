@@ -583,8 +583,21 @@ export async function performDailyCheckin(userId: string) {
   }
 
   // 如果7天都签完了，重新开始
+  let shouldResetCycle = false;
   if (checkedDays.length >= 7) {
     nextDay = 1;
+    shouldResetCycle = true;
+
+    // 删除之前的签到记录，开始新的周期
+    const { error: deleteError } = await admin
+      .from('daily_checkins')
+      .delete()
+      .eq('user_id', userId)
+      .lte('day_number', 7);
+
+    if (deleteError) {
+      console.error('Error resetting checkin cycle:', deleteError);
+    }
   }
 
   const coinsReward = DAILY_REWARDS[nextDay - 1];
@@ -617,4 +630,149 @@ export async function performDailyCheckin(userId: string) {
 // 获取签到奖励配置
 export function getDailyRewards() {
   return DAILY_REWARDS;
+}
+
+// Template functions
+export async function getTemplatesByType(type: 'image' | 'video') {
+  const { data, error } = await supabase
+    .from('templates')
+    .select('*')
+    .eq('type', type)
+    .eq('active', true)
+    .order('sort_order', { ascending: true });
+
+  if (error) {
+    console.error('[getTemplatesByType] Error:', error);
+    throw error;
+  }
+
+  return data || [];
+}
+
+export async function getTemplatesByCategory(type: 'image' | 'video', category: string) {
+  const { data, error } = await supabase
+    .from('templates')
+    .select('*')
+    .eq('type', type)
+    .eq('category', category)
+    .eq('active', true)
+    .order('sort_order', { ascending: true });
+
+  if (error) {
+    console.error('[getTemplatesByCategory] Error:', error);
+    throw error;
+  }
+
+  return data || [];
+}
+
+export async function getTemplateById(id: string) {
+  const { data, error } = await supabase
+    .from('templates')
+    .select('*')
+    .eq('id', id)
+    .single();
+
+  if (error) throw error;
+  return data;
+}
+
+export async function getAllTemplates() {
+  const admin = getSupabaseAdmin();
+  const { data, error } = await admin
+    .from('templates')
+    .select('*')
+    .order('sort_order', { ascending: true });
+
+  if (error) throw error;
+  return data;
+}
+
+export async function createTemplate(templateData: {
+  name: string;
+  description?: string;
+  type: 'image' | 'video';
+  category?: string;
+  model_id?: string;
+  model_name?: string;
+  task_type: string;
+  parameters?: Record<string, any>;
+  prompt_template?: string;
+  max_images?: number;
+  example_prompt?: string;
+  example_images?: string[];
+  preview_image?: string;
+  icon?: string;
+  sort_order?: number;
+  active?: boolean;
+}) {
+  const admin = getSupabaseAdmin();
+  const { data, error } = await admin
+    .from('templates')
+    .insert({
+      name: templateData.name,
+      description: templateData.description,
+      type: templateData.type,
+      category: templateData.category,
+      model_id: templateData.model_id,
+      model_name: templateData.model_name,
+      task_type: templateData.task_type,
+      parameters: templateData.parameters || {},
+      prompt_template: templateData.prompt_template,
+      max_images: templateData.max_images || 0,
+      example_prompt: templateData.example_prompt,
+      example_images: templateData.example_images || [],
+      preview_image: templateData.preview_image,
+      icon: templateData.icon,
+      sort_order: templateData.sort_order || 0,
+      active: templateData.active !== undefined ? templateData.active : true,
+    } as any)
+    .select()
+    .single();
+
+  if (error) throw error;
+  return data;
+}
+
+export async function updateTemplate(id: string, updates: {
+  name?: string;
+  description?: string;
+  type?: 'image' | 'video';
+  category?: string;
+  model_id?: string;
+  model_name?: string;
+  task_type?: string;
+  parameters?: Record<string, any>;
+  prompt_template?: string;
+  max_images?: number;
+  example_prompt?: string;
+  example_images?: string[];
+  preview_image?: string;
+  icon?: string;
+  sort_order?: number;
+  active?: boolean;
+}) {
+  const admin = getSupabaseAdmin();
+  const { data, error } = await admin
+    .from('templates' as any)
+    .update(updates as any)
+    .eq('id', id)
+    .select()
+    .single();
+
+  if (error) throw error;
+  return data;
+}
+
+export async function deleteTemplate(id: string) {
+  const admin = getSupabaseAdmin();
+  const { data, error } = await admin
+    .from('templates')
+    .delete()
+    .eq('id', id)
+    .select()
+    .single();
+
+  if (error) throw error;
+  return data;
 }
