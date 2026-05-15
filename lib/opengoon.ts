@@ -120,10 +120,14 @@ export function parseTaskResultUrl(task: FaceSwapTask): string | null {
   if (!task.response) return null;
 
   try {
-    const parsed = JSON.parse(task.response);
-    return parsed.resultUrl || parsed.previewUrl || null;
+    const parsed =
+      typeof task.response === 'string' ? JSON.parse(task.response) : task.response;
+    if (typeof parsed === 'string') return parsed;
+    return parsed.resultUrl || parsed.previewUrl || parsed.url || null;
   } catch {
-    return null;
+    return typeof task.response === 'string' && task.response.startsWith('http')
+      ? task.response
+      : null;
   }
 }
 
@@ -133,14 +137,20 @@ export function mapTaskStatus(task: FaceSwapTask): {
   error?: string;
 } {
   const normalized = (task.status || '').toLowerCase();
+  const resultUrl = parseTaskResultUrl(task);
+  const isComplete = task.percent === 1 || task.percent === 100;
 
-  if (normalized === 'success' || normalized === 'completed') {
-    const resultUrl = parseTaskResultUrl(task);
+  if (normalized === 'success' || normalized === 'completed' || (isComplete && resultUrl)) {
     return { status: 2, resultUrl: resultUrl || undefined };
   }
 
   if (normalized === 'failed' || normalized === 'error') {
     return { status: 3, error: task.comments || 'Face swap failed' };
+  }
+
+  // Still processing but result may already be available
+  if (resultUrl && isComplete) {
+    return { status: 2, resultUrl };
   }
 
   return { status: 1 };

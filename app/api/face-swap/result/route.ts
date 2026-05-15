@@ -38,6 +38,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({
       status: mapped.status,
       result: mapped.resultUrl ? { url: mapped.resultUrl } : undefined,
+      resultUrl: mapped.resultUrl,
       error: mapped.error,
       percent: task.percent,
     });

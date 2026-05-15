@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useSession } from 'next-auth/react';
-import { Users, Download, Loader2, Upload, Coins } from 'lucide-react';
+import { Users, Download, Loader2, Upload, Coins, Trash2 } from 'lucide-react';
 import LoginModal from '@/components/LoginModal';
 import InsufficientCoinsModal from '@/components/InsufficientCoinsModal';
 import { FACE_SWAP_PRICE } from '@/lib/pricing';
@@ -12,7 +12,20 @@ export const dynamic = 'force-dynamic';
 
 interface GenerationResult {
   url: string;
+  displayUrl: string;
   taskId: string;
+}
+
+function toDisplayUrl(remoteUrl: string): string {
+  return `/api/face-swap/image?url=${encodeURIComponent(remoteUrl)}`;
+}
+
+function extractResultUrl(data: {
+  status?: number;
+  result?: { url?: string };
+  resultUrl?: string;
+}): string | null {
+  return data.result?.url || data.resultUrl || null;
 }
 
 async function uploadImage(file: File): Promise<string> {
@@ -54,19 +67,20 @@ function UploadSlot({
       <p className="text-xs text-gray-500 mb-2">{hint}</p>
       <div className="border-2 border-dashed border-gray-200 rounded-lg p-6 text-center hover:border-rose-400 transition">
         {preview ? (
-          <div className="relative">
+          <div className="relative inline-block w-full">
             <img src={preview} alt={label} className="max-h-48 mx-auto rounded" />
             <button
               type="button"
               onClick={onClear}
               disabled={disabled}
-              className="absolute top-2 right-2 px-3 py-1 bg-red-500 text-white text-sm rounded hover:bg-red-600 disabled:opacity-50"
+              className="absolute top-2 right-2 p-2 bg-black/60 text-white rounded-full hover:bg-black/80 transition disabled:opacity-50"
+              aria-label="Remove image"
             >
-              Remove
+              <Trash2 className="w-4 h-4" />
             </button>
           </div>
         ) : (
-          <label className={`cursor-pointer ${disabled ? 'opacity-50 pointer-events-none' : ''}`}>
+          <label className={`cursor-pointer block ${disabled ? 'opacity-50 pointer-events-none' : ''}`}>
             <Upload className="w-10 h-10 mx-auto text-gray-400 mb-3" />
             <p className="text-gray-600 text-sm">Click to upload image</p>
             <input
@@ -140,8 +154,15 @@ export default function FaceSwapPage() {
           throw new Error(data.error || 'Failed to fetch result');
         }
 
-        if (data.status === 2 && data.result?.url) {
-          setResult({ url: data.result.url, taskId: id });
+        const remoteUrl = extractResultUrl(data);
+
+        if (data.status === 2 && remoteUrl) {
+          setResult({
+            url: remoteUrl,
+            displayUrl: toDisplayUrl(remoteUrl),
+            taskId: id,
+          });
+          setLoading(false);
           setTaskId(null);
           return;
         }
@@ -157,6 +178,7 @@ export default function FaceSwapPage() {
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to fetch result');
     } finally {
+      setLoading(false);
       setTaskId(null);
     }
   };
@@ -224,7 +246,7 @@ export default function FaceSwapPage() {
     if (!result?.url) return;
 
     try {
-      const response = await fetch(result.url);
+      const response = await fetch(toDisplayUrl(result.url));
       const blob = await response.blob();
       const blobUrl = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
@@ -239,7 +261,8 @@ export default function FaceSwapPage() {
     }
   };
 
-  const isProcessing = loading || !!taskId;
+  const isProcessing = loading || uploading || !!taskId;
+  const hasResult = !!result?.displayUrl;
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -274,6 +297,10 @@ export default function FaceSwapPage() {
               onClear={() => clearImage('face')}
             />
 
+            {error && (
+              <div className="p-3 bg-red-50 text-red-700 rounded-lg text-sm">{error}</div>
+            )}
+
             <div className="flex items-center justify-between text-sm text-gray-600 bg-rose-50 rounded-lg px-4 py-3">
               <span>Cost per generation</span>
               <span className="font-semibold text-rose-700 flex items-center">
@@ -281,10 +308,6 @@ export default function FaceSwapPage() {
                 <Coins className="w-4 h-4 ml-1" />
               </span>
             </div>
-
-            {error && (
-              <div className="p-3 bg-red-50 text-red-700 rounded-lg text-sm">{error}</div>
-            )}
 
             <button
               onClick={handleGenerate}
@@ -307,19 +330,26 @@ export default function FaceSwapPage() {
             </button>
           </div>
 
-          <div className="bg-white rounded-xl p-6 shadow-sm">
+          <div className="bg-white rounded-xl p-6 shadow-sm min-h-[320px]">
             <h2 className="text-lg font-semibold mb-4">Result</h2>
 
-            {result?.url ? (
+            {hasResult ? (
               <div className="space-y-4">
                 <div
-                  className="relative cursor-pointer rounded-lg overflow-hidden border"
-                  onClick={() => setViewingImage(result.url)}
+                  className="relative cursor-pointer rounded-lg overflow-hidden border bg-gray-50 min-h-[240px] flex items-center justify-center"
+                  onClick={() => setViewingImage(result!.displayUrl)}
                 >
                   <img
-                    src={result.url}
+                    src={result!.displayUrl}
                     alt="Face swap result"
-                    className="w-full h-auto max-h-[480px] object-contain bg-gray-50"
+                    className="w-full h-auto max-h-[480px] object-contain"
+                    referrerPolicy="no-referrer"
+                    onError={(e) => {
+                      const img = e.currentTarget;
+                      if (img.src !== result!.url) {
+                        img.src = result!.url;
+                      }
+                    }}
                   />
                 </div>
                 <button
