@@ -1,20 +1,20 @@
-import { supabase } from '@/lib/supabase';
+import { getSupabase } from '@/lib/supabase';
 import { NextResponse } from 'next/server';
 
 export async function GET() {
   // 查询所有数据
-  const { data: allData, error: allError } = await supabase
+  const { data: allData, error: allError } = await getSupabase()
     .from('models')
     .select('*');
 
   // 查询text2image类型
-  const { data: text2image, error: textError } = await supabase
+  const { data: text2image, error: textError } = await getSupabase()
     .from('models')
     .select('*')
     .eq('type', 'text2image');
 
   // 查询所有不同的type值
-  const { data: typesData } = await supabase
+  const { data: typesData } = await getSupabase()
     .from('models')
     .select('type');
 

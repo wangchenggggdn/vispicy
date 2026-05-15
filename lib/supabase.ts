@@ -1,26 +1,42 @@
-import { createClient } from '@supabase/supabase-js';
+import { createClient, SupabaseClient } from '@supabase/supabase-js';
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
+// Lazy initialization — avoids "supabaseUrl is required" during `next build`
+// when env vars are not injected at build time.
+let _supabase: SupabaseClient | null = null;
+let _supabaseAdmin: SupabaseClient | null = null;
 
-// Anon key client - respects RLS
-export const supabase = createClient(supabaseUrl, supabaseAnonKey);
+function getSupabaseUrl(): string {
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  if (!url) {
+    throw new Error('NEXT_PUBLIC_SUPABASE_URL environment variable is required');
+  }
+  return url;
+}
 
-// Service role client - bypasses RLS (use only on server-side)
-// Lazy initialization to avoid errors when env var is not set
-let _supabaseAdmin: ReturnType<typeof createClient> | null = null;
+/** Anon key client — respects RLS */
+export function getSupabase(): SupabaseClient {
+  if (!_supabase) {
+    const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+    if (!anonKey) {
+      throw new Error('NEXT_PUBLIC_SUPABASE_ANON_KEY environment variable is required');
+    }
+    _supabase = createClient(getSupabaseUrl(), anonKey);
+  }
+  return _supabase;
+}
 
-export function getSupabaseAdmin() {
+/** Service role client — bypasses RLS (server-side only) */
+export function getSupabaseAdmin(): SupabaseClient {
   if (!_supabaseAdmin) {
-    const supabaseServiceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-    if (!supabaseServiceRoleKey) {
+    const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+    if (!serviceRoleKey) {
       throw new Error('SUPABASE_SERVICE_ROLE_KEY environment variable is required for admin operations');
     }
-    _supabaseAdmin = createClient(supabaseUrl, supabaseServiceRoleKey, {
+    _supabaseAdmin = createClient(getSupabaseUrl(), serviceRoleKey, {
       auth: {
         autoRefreshToken: false,
-        persistSession: false
-      }
+        persistSession: false,
+      },
     });
   }
   return _supabaseAdmin;
@@ -251,7 +267,7 @@ export async function createOrder(orderData: {
 }
 
 export async function getModelsByType(type: string) {
-  const { data, error } = await supabase
+  const { data, error } = await getSupabase()
     .from('models')
     .select('*')
     .eq('type', type)
@@ -634,7 +650,7 @@ export function getDailyRewards() {
 
 // Template functions
 export async function getTemplatesByType(type: 'image' | 'video') {
-  const { data, error } = await supabase
+  const { data, error } = await getSupabase()
     .from('templates')
     .select('*')
     .eq('type', type)
@@ -650,7 +666,7 @@ export async function getTemplatesByType(type: 'image' | 'video') {
 }
 
 export async function getTemplatesByCategory(type: 'image' | 'video', category: string) {
-  const { data, error } = await supabase
+  const { data, error } = await getSupabase()
     .from('templates')
     .select('*')
     .eq('type', type)
@@ -667,7 +683,7 @@ export async function getTemplatesByCategory(type: 'image' | 'video', category: 
 }
 
 export async function getTemplateById(id: string) {
-  const { data, error } = await supabase
+  const { data, error } = await getSupabase()
     .from('templates')
     .select('*')
     .eq('id', id)
