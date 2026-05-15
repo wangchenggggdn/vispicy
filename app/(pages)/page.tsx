@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import Image from 'next/image';
+import { useRouter } from 'next/navigation';
 import { ImageIcon, VideoIcon, Sparkles, Zap, Shield, CheckCircle2, Users, ArrowRight } from 'lucide-react';
 import Footer from '@/components/Footer';
 
@@ -67,6 +68,12 @@ const sampleWorks = [
 ];
 
 export default function Home() {
+  const router = useRouter();
+
+  const goToFaceSwap = () => {
+    router.push('/face-swap');
+  };
+
   // JSON-LD Structured Data for SEO
   const jsonLd = {
     '@context': 'https://schema.org',
@@ -107,26 +114,32 @@ export default function Home() {
             </p>
 
             <div className="max-w-4xl mx-auto mb-10">
-              <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-rose-100/80 text-rose-700 text-sm font-medium mb-5 border border-rose-200/60">
+              <button
+                type="button"
+                onClick={goToFaceSwap}
+                className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-rose-100/80 text-rose-700 text-sm font-medium mb-5 border border-rose-200/60 hover:bg-rose-200/80 transition cursor-pointer"
+              >
                 <Users className="w-4 h-4" />
                 AI Face Swap — Real results in seconds
-              </div>
+              </button>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 sm:gap-6">
                 {faceSwapShowcase.map((item) => (
-                  <Link
+                  <button
                     key={item.src}
-                    href="/face-swap"
-                    className="group relative block rounded-2xl overflow-hidden bg-white shadow-lg shadow-rose-200/40 ring-1 ring-rose-100 hover:shadow-xl hover:shadow-rose-300/50 hover:ring-rose-300 transition-all duration-300 hover:-translate-y-1"
+                    type="button"
+                    onClick={goToFaceSwap}
+                    aria-label={`Try face swap: ${item.title}`}
+                    className="group relative block w-full text-left rounded-2xl overflow-hidden bg-white shadow-lg shadow-rose-200/40 ring-1 ring-rose-100 hover:shadow-xl hover:shadow-rose-300/50 hover:ring-rose-300 transition-all duration-300 hover:-translate-y-1 cursor-pointer"
                   >
                     <div className="absolute inset-0 bg-gradient-to-br from-rose-500/10 via-transparent to-orange-500/10 opacity-0 group-hover:opacity-100 transition-opacity z-10 pointer-events-none" />
-                    <div className="relative aspect-[4/3] overflow-hidden bg-gradient-to-br from-gray-100 to-rose-50">
+                    <div className="relative aspect-[4/3] overflow-hidden bg-gradient-to-br from-gray-100 to-rose-50 pointer-events-none">
                       <Image
                         src={item.src}
                         alt={item.alt}
                         fill
                         sizes="(max-width: 640px) 100vw, 400px"
-                        className="object-cover transition-transform duration-500 group-hover:scale-105"
+                        className="object-cover transition-transform duration-500 group-hover:scale-105 pointer-events-none"
                         priority
                       />
                       <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-black/70 via-black/30 to-transparent" />
@@ -144,7 +157,7 @@ export default function Home() {
                         </span>
                       </div>
                     </div>
-                  </Link>
+                  </button>
                 ))}
               </div>
             </div>
