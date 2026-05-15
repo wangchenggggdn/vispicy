@@ -13,7 +13,6 @@
 ## 🎨 What is Vispicy?
 
 **Vispicy** is a cutting-edge AI-powered creative platform that enables anyone to generate stunning images and videos from text descriptions or reference images. Whether you're a digital artist, content creator, marketer, or business owner, Vispicy provides the tools you need to bring your creative vision to life in seconds.
-
 ---
 
 ## ✨ Key Features
