@@ -1,8 +1,22 @@
 'use client';
 
 import Link from 'next/link';
-import { ImageIcon, VideoIcon, Sparkles, Zap, Shield, CheckCircle2 } from 'lucide-react';
+import Image from 'next/image';
+import { ImageIcon, VideoIcon, Sparkles, Zap, Shield, CheckCircle2, Users, ArrowRight } from 'lucide-react';
 import Footer from '@/components/Footer';
+
+const faceSwapShowcase = [
+  {
+    src: '/img/confused-black-guy-meme-face-swap.webp',
+    title: 'Meme Face Swap',
+    alt: 'AI face swap on confused guy meme — before and after result',
+  },
+  {
+    src: '/img/pirates-of-the-caribbean-face-swap.webp',
+    title: 'Movie Scene Swap',
+    alt: 'AI face swap on Pirates of the Caribbean scene — cinematic result',
+  },
+];
 
 export const dynamic = 'force-dynamic';
 
@@ -20,7 +34,7 @@ const sampleWorks = [
     type: 'video',
     url: '/img/f01bfe791b0323e2c3e2a212c55d0d1a.mp4',
     title: 'AI Animation',
-    alt: 'AI-generated animation video showcasing dynamic motion'
+    alt: 'AI-generated animation video showcasing dynamic div'
   },
   {
     id: 3,
@@ -34,7 +48,7 @@ const sampleWorks = [
     type: 'video',
     url: '/img/8aa710b54100b4a7e154c204ea6a5944.mp4',
     title: 'Motion Design',
-    alt: 'AI-generated motion design with smooth transitions'
+    alt: 'AI-generated div design with smooth transitions'
   },
   {
     id: 5,
@@ -87,19 +101,64 @@ export default function Home() {
             <h1 className="text-6xl font-bold mb-6 bg-gradient-to-r from-red-600 via-orange-600 to-yellow-600 bg-clip-text text-transparent leading-tight">
               Create Stunning Visuals with AI
             </h1>
-            <p className="text-xl text-gray-600 mb-8 max-w-3xl mx-auto">
+            <p className="text-xl text-gray-600 mb-10 max-w-3xl mx-auto">
               Transform your imagination into reality with Vispicy's advanced AI image and video generation tools.
               From text to images, image to image, to dynamic videos – bring your creative vision to life in seconds.
             </p>
 
-            <div className="flex items-center justify-center gap-4 mb-8">
+            <div className="max-w-4xl mx-auto mb-10">
+              <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-rose-100/80 text-rose-700 text-sm font-medium mb-5 border border-rose-200/60">
+                <Users className="w-4 h-4" />
+                AI Face Swap — Real results in seconds
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 sm:gap-6">
+                {faceSwapShowcase.map((item) => (
+                  <Link
+                    key={item.src}
+                    href="/face-swap"
+                    className="group relative block rounded-2xl overflow-hidden bg-white shadow-lg shadow-rose-200/40 ring-1 ring-rose-100 hover:shadow-xl hover:shadow-rose-300/50 hover:ring-rose-300 transition-all duration-300 hover:-translate-y-1"
+                  >
+                    <div className="absolute inset-0 bg-gradient-to-br from-rose-500/10 via-transparent to-orange-500/10 opacity-0 group-hover:opacity-100 transition-opacity z-10 pointer-events-none" />
+                    <div className="relative aspect-[4/3] overflow-hidden bg-gradient-to-br from-gray-100 to-rose-50">
+                      <Image
+                        src={item.src}
+                        alt={item.alt}
+                        fill
+                        sizes="(max-width: 640px) 100vw, 400px"
+                        className="object-cover transition-transform duration-500 group-hover:scale-105"
+                        priority
+                      />
+                      <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-black/70 via-black/30 to-transparent" />
+                      <div className="absolute bottom-0 left-0 right-0 p-4 flex items-end justify-between z-20">
+                        <div className="text-left">
+                          <span className="inline-block px-2 py-0.5 mb-1.5 text-[10px] font-semibold uppercase tracking-wider text-rose-100 bg-rose-500/80 rounded">
+                            Face Swap
+                          </span>
+                          <p className="text-white font-semibold text-sm sm:text-base drop-shadow-sm">
+                            {item.title}
+                          </p>
+                        </div>
+                        <span className="flex items-center justify-center w-9 h-9 rounded-full bg-white/90 text-rose-600 opacity-0 translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-300">
+                          <ArrowRight className="w-4 h-4" />
+                        </span>
+                      </div>
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            </div>
+
+            <div className="flex flex-col items-center justify-center gap-3 mb-8">
               <Link
-                href="/text-to-image"
-                className="px-8 py-4 bg-gradient-to-r from-red-600 to-orange-600 text-white rounded-lg font-semibold hover:opacity-90 transition shadow-lg text-lg"
-                aria-label="Start creating for free with Vispicy AI tools"
+                href="/face-swap"
+                className="inline-flex items-center gap-2 px-8 py-4 bg-gradient-to-r from-red-600 to-orange-600 text-white rounded-xl font-semibold hover:from-red-700 hover:to-orange-700 transition-all shadow-lg shadow-orange-500/30 hover:shadow-xl hover:shadow-orange-500/40 text-lg"
+                aria-label="Start creating for free with Vispicy AI face swap"
               >
                 Start Creating for Free
+                <ArrowRight className="w-5 h-5" />
               </Link>
+              <p className="text-sm text-gray-500">100 free coins on sign up · Try face swap instantly</p>
             </div>
           </div>
 
