@@ -4,7 +4,7 @@ import { useSession, signOut, getSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import useSWR from 'swr';
-import { User, Coins, History, Calendar, CreditCard, ImageIcon, Video, ExternalLink, X, Download, Gift } from 'lucide-react';
+import { User, Coins, History, Calendar, CreditCard, ImageIcon, Video, ExternalLink, X, Download, Gift, Users } from 'lucide-react';
 import { formatDate, getSubscriptionLabel, getSubscriptionStatus } from '@/lib/utils';
 import { useEffect, useRef, useState } from 'react';
 import SubscriptionModal from '@/components/SubscriptionModal';
@@ -142,6 +142,7 @@ export default function UserPage() {
               image2image: '/api/generate/image-to-image/result',
               text2video: '/api/generate/text-to-video/result',
               image2video: '/api/generate/image-to-video/result',
+              'face-swap': '/api/face-swap/result',
             };
 
             const apiPath = apiPaths[job.task_type];
@@ -423,6 +424,7 @@ Sign Out
             <div className="space-y-4">
               {historyData.history.map((item: any) => {
                 const taskTypeMap: Record<string, { label: string; icon: any; color: string }> = {
+                  'face-swap': { label: 'Face Swap', icon: Users, color: 'text-rose-600' },
                   text2image: { label: 'Text to Image', icon: ImageIcon, color: 'text-purple-600' },
                   image2image: { label: 'Image to Image', icon: ImageIcon, color: 'text-blue-600' },
                   text2video: { label: 'Text to Video', icon: Video, color: 'text-indigo-600' },
@@ -529,7 +531,8 @@ Sign Out
                 <div>
                   <span className="text-gray-600">Task Type:</span>
                   <span className="ml-2 font-medium">
-                    {selectedRecord.task_type === 'text2image' ? 'Text to Image' :
+                    {selectedRecord.task_type === 'face-swap' ? 'Face Swap' :
+                     selectedRecord.task_type === 'text2image' ? 'Text to Image' :
                      selectedRecord.task_type === 'image2image' ? 'Image to Image' :
                      selectedRecord.task_type === 'text2video' ? 'Text to Video' :
                      selectedRecord.task_type === 'image2video' ? 'Image to Video' : selectedRecord.task_type}

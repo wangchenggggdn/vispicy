@@ -15,6 +15,12 @@ export default function sitemap(): MetadataRoute.Sitemap {
 
     // ========== AI 工具页面 ==========
     {
+      url: `${baseUrl}/face-swap`,
+      lastModified: currentDate,
+      changeFrequency: 'daily',
+      priority: 0.95,
+    },
+    {
       url: `${baseUrl}/text-to-image`,
       lastModified: currentDate,
       changeFrequency: 'daily',

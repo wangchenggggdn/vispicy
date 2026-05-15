@@ -42,6 +42,9 @@ export default function Header() {
 
         <nav className="flex items-center space-x-4 lg:space-x-6">
           <div className="hidden md:flex items-center space-x-4 lg:space-x-6">
+            <Link href="/face-swap" className="text-gray-700 hover:text-red-600 transition text-sm whitespace-nowrap">
+              Face Swap
+            </Link>
             <Link href="/text-to-image" className="text-gray-700 hover:text-red-600 transition text-sm whitespace-nowrap">
               Text to Image
             </Link>
