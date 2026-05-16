@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useSession } from 'next-auth/react';
+import Image from 'next/image';
 import { Users, Download, Loader2, Upload, Coins, Trash2 } from 'lucide-react';
 import LoginModal from '@/components/LoginModal';
 import InsufficientCoinsModal from '@/components/InsufficientCoinsModal';
@@ -53,6 +54,9 @@ function UploadSlot({
   disabled,
   onSelect,
   onClear,
+  exampleSrc,
+  exampleAlt,
+  exampleCaption,
 }: {
   label: string;
   hint: string;
@@ -60,11 +64,39 @@ function UploadSlot({
   disabled: boolean;
   onSelect: (e: React.ChangeEvent<HTMLInputElement>) => void;
   onClear: () => void;
+  /** 参考示例图（如 Face Source 的人脸示范），仅在未选择文件时显示 */
+  exampleSrc?: string;
+  exampleAlt?: string;
+  exampleCaption?: string;
 }) {
+  const showExample = exampleSrc && !preview;
+
   return (
     <div>
       <label className="block text-sm font-medium mb-1">{label} *</label>
       <p className="text-xs text-gray-500 mb-2">{hint}</p>
+
+      {showExample && (
+        <div className="mb-3 flex gap-3 rounded-xl border border-rose-100 bg-gradient-to-br from-rose-50/90 to-orange-50/50 p-3 shadow-sm">
+          <div className="relative h-24 w-20 shrink-0 overflow-hidden rounded-lg ring-2 ring-white shadow-md">
+            <Image
+              src={exampleSrc}
+              alt={exampleAlt || 'Example'}
+              fill
+              sizes="80px"
+              className="object-cover"
+            />
+          </div>
+          <div className="min-w-0 flex-1 pt-0.5">
+            <p className="text-xs font-semibold uppercase tracking-wide text-rose-700">Example</p>
+            <p className="mt-1 text-xs leading-snug text-gray-600">
+              {exampleCaption ||
+                'Clear front-facing portrait or headshot; good lighting gives better results.'}
+            </p>
+          </div>
+        </div>
+      )}
+
       <div className="border-2 border-dashed border-gray-200 rounded-lg p-6 text-center hover:border-rose-400 transition">
         {preview ? (
           <div className="relative inline-block w-full">
@@ -295,6 +327,9 @@ export default function FaceSwapPage() {
               disabled={isProcessing}
               onSelect={(e) => handleFileSelect(e, 'face')}
               onClear={() => clearImage('face')}
+              exampleSrc="/img/head.png"
+              exampleAlt="Example face source: clear portrait headshot for face swap"
+              exampleCaption="Upload a photo like this — front-facing face, even lighting, similar to a headshot."
             />
 
             {error && (
