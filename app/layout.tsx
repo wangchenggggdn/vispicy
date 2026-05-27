@@ -76,7 +76,7 @@ export default function RootLayout({
       </head>
       <body className="antialiased">
         <Script
-          src="https://www.googletagmanager.com/gtag/js?id=G-PLDHZHKBFY"
+          src="https://www.googletagmanager.com/gtag/js?id=G-J7X6KQQVRN"
           strategy="afterInteractive"
         />
         <Script id="google-analytics" strategy="afterInteractive">
@@ -84,7 +84,7 @@ export default function RootLayout({
             window.dataLayer = window.dataLayer || [];
             function gtag(){dataLayer.push(arguments);}
             gtag('js', new Date());
-            gtag('config', 'G-PLDHZHKBFY');
+            gtag('config', 'G-J7X6KQQVRN');
           `}
         </Script>
         <Providers>{children}</Providers>
