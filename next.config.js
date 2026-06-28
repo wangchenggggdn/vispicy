@@ -19,7 +19,7 @@ const nextConfig = {
   // Ensure NextAuth routes work on Netlify
   experimental: {
     serverActions: {
-      allowedOrigins: ['vispicy.com', 'www.vispicy.com'],
+      allowedOrigins: ['vispicy.com', 'www.vispicy.com', 'face-swap.vispicy.com'],
     },
   },
 }

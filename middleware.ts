@@ -25,7 +25,15 @@ const BLOCKED_COUNTRIES = [
   // 可以根据需要添加其他国家
 ];
 
+const FACE_SWAP_HOST = 'face-swap.vispicy.com';
+
 export function middleware(request: NextRequest) {
+  const host = request.headers.get('host')?.split(':')[0];
+
+  if (host === FACE_SWAP_HOST) {
+    return NextResponse.redirect(new URL('https://vispicy.com/face-swap'), 308);
+  }
+
   // 获取请求的 IP 地址
   const ip = request.headers.get('x-forwarded-for') ||
              request.headers.get('x-real-ip') ||

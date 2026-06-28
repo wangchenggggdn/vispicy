@@ -5,7 +5,13 @@
   "framework": "nextjs",
   "redirects": [
     {
-      "source": "/:path*",
+      "source": "/",
+      "has": [{ "type": "host", "value": "face-swap.vispicy.com" }],
+      "destination": "https://vispicy.com/face-swap",
+      "permanent": true
+    },
+    {
+      "source": "/:path+",
       "has": [{ "type": "host", "value": "face-swap.vispicy.com" }],
       "destination": "https://vispicy.com/face-swap",
       "permanent": true
