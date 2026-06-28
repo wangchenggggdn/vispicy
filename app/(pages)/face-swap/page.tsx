@@ -469,20 +469,20 @@ export default function FaceSwapPage() {
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="max-w-6xl mx-auto">
-        <div className="mb-8">
+        <header className="mb-8">
           <h1 className="text-3xl font-bold mb-2 flex items-center">
-            <Users className="w-8 h-8 mr-3 text-rose-600" />
-            Face Swap
+            <Users className="w-8 h-8 mr-3 text-rose-600" aria-hidden="true" />
+            Free Face Swap
           </h1>
           <p className="text-gray-600">
-            Upload a target photo and a face source photo. AI will swap the face onto your image.
+            Free AI face swap online — upload a target photo and a face source photo. Swap faces in seconds with realistic results.
           </p>
           {!isLoggedIn && (
             <p className="text-sm text-rose-700 mt-2">
               Try once for free without signing in. After that, each use costs ${FACE_SWAP_GUEST_PRICE_USD.toFixed(2)}.
             </p>
           )}
-        </div>
+        </header>
 
         {paymentMessage && (
           <div className="mb-6 p-3 bg-blue-50 text-blue-800 rounded-lg text-sm">{paymentMessage}</div>
@@ -563,7 +563,7 @@ export default function FaceSwapPage() {
           </div>
 
           <div className="bg-white rounded-xl p-6 shadow-sm min-h-[320px]">
-            <h2 className="text-lg font-semibold mb-4">Result</h2>
+            <h2 className="text-lg font-semibold mb-4">Face Swap Result</h2>
 
             {hasResult ? (
               <div className="space-y-4">
@@ -608,6 +608,35 @@ export default function FaceSwapPage() {
             )}
           </div>
         </div>
+
+        <section
+          className="mt-12 bg-white rounded-xl p-6 shadow-sm border border-rose-50"
+          aria-labelledby="face-swap-faq-heading"
+        >
+          <h2 id="face-swap-faq-heading" className="text-xl font-bold text-gray-900 mb-4">
+            Free Face Swap FAQ
+          </h2>
+          <dl className="space-y-4 text-sm text-gray-600">
+            <div>
+              <dt className="font-semibold text-gray-800">Is this face swap free?</dt>
+              <dd className="mt-1">
+                Yes — your first face swap is free with no sign up. Create a Vispicy account for coins, history, and access to more AI tools.
+              </dd>
+            </div>
+            <div>
+              <dt className="font-semibold text-gray-800">What photos work best?</dt>
+              <dd className="mt-1">
+                Use clear, front-facing photos with good lighting. One image is the scene or body (target), the other is the face you want to swap in (source).
+              </dd>
+            </div>
+            <div>
+              <dt className="font-semibold text-gray-800">How fast is the AI face swap?</dt>
+              <dd className="mt-1">
+                Most swaps complete in seconds after upload. Results can be previewed and downloaded directly from this page.
+              </dd>
+            </div>
+          </dl>
+        </section>
       </div>
 
       {viewingImage && (
