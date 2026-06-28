@@ -102,9 +102,6 @@ export const authOptions: NextAuthOptions = {
       },
     }),
   ],
-  pages: {
-    signIn: '/',
-  },
   debug: true, // 启用 NextAuth 调试模式
   callbacks: {
     async signIn({ user, account, profile }) {

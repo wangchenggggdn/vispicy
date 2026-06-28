@@ -1,20 +1,31 @@
 'use client';
 
-import { useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useSession } from 'next-auth/react';
+import { useSearchParams } from 'next/navigation';
 import Image from 'next/image';
-import { Users, Download, Loader2, Upload, Coins, Trash2 } from 'lucide-react';
+import { Users, Download, Loader2, Upload, Coins, Trash2, CreditCard, X } from 'lucide-react';
 import LoginModal from '@/components/LoginModal';
 import InsufficientCoinsModal from '@/components/InsufficientCoinsModal';
-import { FACE_SWAP_PRICE } from '@/lib/pricing';
+import { FACE_SWAP_GUEST_PRICE_USD, FACE_SWAP_PRICE } from '@/lib/pricing';
 import { triggerCoinsUpdate, useCoins } from '@/hooks/use-coins';
 
 export const dynamic = 'force-dynamic';
+
+const PENDING_SWAP_KEY = 'face_swap_pending';
 
 interface GenerationResult {
   url: string;
   displayUrl: string;
   taskId: string;
+}
+
+interface GuestStatus {
+  mode: 'guest';
+  trialUsed: boolean;
+  hasPaidCredit: boolean;
+  freeTrialAvailable: boolean;
+  priceUsd: number;
 }
 
 function toDisplayUrl(remoteUrl: string): string {
@@ -64,7 +75,6 @@ function UploadSlot({
   disabled: boolean;
   onSelect: (e: React.ChangeEvent<HTMLInputElement>) => void;
   onClear: () => void;
-  /** 参考示例图（如 Face Source 的人脸示范），仅在未选择文件时显示 */
   exampleSrc?: string;
   exampleAlt?: string;
   exampleCaption?: string;
@@ -131,6 +141,7 @@ function UploadSlot({
 
 export default function FaceSwapPage() {
   const { data: session } = useSession();
+  const searchParams = useSearchParams();
   const { coins } = useCoins(30);
   const [targetFile, setTargetFile] = useState<File | null>(null);
   const [faceFile, setFaceFile] = useState<File | null>(null);
@@ -144,6 +155,30 @@ export default function FaceSwapPage() {
   const [viewingImage, setViewingImage] = useState<string | null>(null);
   const [showLoginModal, setShowLoginModal] = useState(false);
   const [showInsufficientCoinsModal, setShowInsufficientCoinsModal] = useState(false);
+  const [showGuestPaymentModal, setShowGuestPaymentModal] = useState(false);
+  const [guestStatus, setGuestStatus] = useState<GuestStatus | null>(null);
+  const [paymentLoading, setPaymentLoading] = useState(false);
+  const [paymentMessage, setPaymentMessage] = useState('');
+  const paymentCaptureStarted = useRef(false);
+
+  const refreshGuestStatus = useCallback(async () => {
+    if (session?.user?.id) {
+      setGuestStatus(null);
+      return;
+    }
+
+    try {
+      const response = await fetch('/api/face-swap/guest-status');
+      if (response.ok) {
+        const data = await response.json();
+        if (data.mode === 'guest') {
+          setGuestStatus(data);
+        }
+      }
+    } catch (err) {
+      console.error('[Face-Swap] Failed to fetch guest status:', err);
+    }
+  }, [session?.user?.id]);
 
   const handleFileSelect = (
     e: React.ChangeEvent<HTMLInputElement>,
@@ -175,6 +210,10 @@ export default function FaceSwapPage() {
       setFacePreview(null);
     }
   };
+
+  useEffect(() => {
+    refreshGuestStatus();
+  }, [refreshGuestStatus]);
 
   const pollForResult = async (id: string) => {
     try {
@@ -215,18 +254,43 @@ export default function FaceSwapPage() {
     }
   };
 
-  const handleGenerate = async () => {
-    if (!session) {
-      setShowLoginModal(true);
-      return;
+  const runFaceSwap = useCallback(async (imageUrl: string, sourceUrl: string) => {
+    const response = await fetch('/api/face-swap', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ imageUrl, sourceUrl }),
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      if (response.status === 402) {
+        if (session?.user?.id) {
+          setShowInsufficientCoinsModal(true);
+        } else if (data.requiresPayment) {
+          setShowGuestPaymentModal(true);
+        }
+        return null;
+      }
+      throw new Error(data.error || 'Face swap failed');
     }
 
+    if (session?.user?.id) {
+      triggerCoinsUpdate();
+    } else {
+      await refreshGuestStatus();
+    }
+
+    return data.taskId as string;
+  }, [session?.user?.id, refreshGuestStatus]);
+
+  const handleGenerate = async () => {
     if (!targetFile || !faceFile) {
       setError('Please upload both target image and face source image');
       return;
     }
 
-    if (coins !== null && coins < FACE_SWAP_PRICE) {
+    if (session?.user?.id && coins !== null && coins < FACE_SWAP_PRICE) {
       setShowInsufficientCoinsModal(true);
       return;
     }
@@ -245,32 +309,129 @@ export default function FaceSwapPage() {
 
       setUploading(false);
 
-      const response = await fetch('/api/face-swap', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ imageUrl, sourceUrl }),
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        if (response.status === 402) {
-          setShowInsufficientCoinsModal(true);
-          return;
-        }
-        throw new Error(data.error || 'Face swap failed');
+      const newTaskId = await runFaceSwap(imageUrl, sourceUrl);
+      if (!newTaskId) {
+        return;
       }
 
-      if (data.taskId) {
-        setTaskId(data.taskId);
-        triggerCoinsUpdate();
-        await pollForResult(data.taskId);
-      }
+      setTaskId(newTaskId);
+      await pollForResult(newTaskId);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Face swap failed, please try again');
     } finally {
       setLoading(false);
       setUploading(false);
+    }
+  };
+
+  const resumePendingSwap = useCallback(async () => {
+    const raw = sessionStorage.getItem(PENDING_SWAP_KEY);
+    if (!raw) return;
+
+    try {
+      const pending = JSON.parse(raw) as { imageUrl: string; sourceUrl: string };
+      if (!pending.imageUrl || !pending.sourceUrl) return;
+
+      setLoading(true);
+      setError('');
+      setResult(null);
+
+      const newTaskId = await runFaceSwap(pending.imageUrl, pending.sourceUrl);
+      sessionStorage.removeItem(PENDING_SWAP_KEY);
+
+      if (!newTaskId) {
+        return;
+      }
+
+      setTaskId(newTaskId);
+      await pollForResult(newTaskId);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Face swap failed, please try again');
+    } finally {
+      setLoading(false);
+    }
+  }, [runFaceSwap]);
+
+  useEffect(() => {
+    const paypalState = searchParams.get('paypal');
+    const token = searchParams.get('token');
+
+    if (paypalState === 'cancel') {
+      setPaymentMessage('Payment cancelled.');
+      window.history.replaceState({}, '', '/face-swap');
+      return;
+    }
+
+    if (paypalState !== 'return' || !token || paymentCaptureStarted.current) {
+      return;
+    }
+
+    paymentCaptureStarted.current = true;
+
+    const capturePayment = async () => {
+      setPaymentLoading(true);
+      setPaymentMessage('Confirming your payment...');
+
+      try {
+        const response = await fetch('/api/face-swap/payment/capture-order', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ orderId: token }),
+        });
+
+        const data = await response.json();
+        if (!response.ok) {
+          throw new Error(data.error || 'Payment processing failed');
+        }
+
+        await refreshGuestStatus();
+        setPaymentMessage('Payment successful. Starting face swap...');
+        window.history.replaceState({}, '', '/face-swap');
+        await resumePendingSwap();
+      } catch (err) {
+        setPaymentMessage(err instanceof Error ? err.message : 'Payment processing failed');
+        window.history.replaceState({}, '', '/face-swap');
+      } finally {
+        setPaymentLoading(false);
+      }
+    };
+
+    capturePayment();
+  }, [searchParams, refreshGuestStatus, resumePendingSwap]);
+
+  const handleGuestPayment = async () => {
+    setPaymentLoading(true);
+    setError('');
+
+    try {
+      if (!targetFile || !faceFile) {
+        throw new Error('Please upload both images before paying');
+      }
+
+      const [imageUrl, sourceUrl] = await Promise.all([
+        uploadImage(targetFile),
+        uploadImage(faceFile),
+      ]);
+
+      sessionStorage.setItem(PENDING_SWAP_KEY, JSON.stringify({ imageUrl, sourceUrl }));
+
+      const response = await fetch('/api/face-swap/payment/create-order', {
+        method: 'POST',
+      });
+
+      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to create payment');
+      }
+
+      if (data.approveUrl) {
+        window.location.href = data.approveUrl;
+      } else {
+        throw new Error('No payment URL received');
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Payment failed, please try again');
+      setPaymentLoading(false);
     }
   };
 
@@ -293,8 +454,17 @@ export default function FaceSwapPage() {
     }
   };
 
-  const isProcessing = loading || uploading || !!taskId;
+  const isProcessing = loading || uploading || !!taskId || paymentLoading;
   const hasResult = !!result?.displayUrl;
+  const isLoggedIn = !!session?.user?.id;
+
+  const costLabel = isLoggedIn
+    ? `${FACE_SWAP_PRICE} coins per generation`
+    : guestStatus?.freeTrialAvailable
+      ? 'Free trial · 1 use without login'
+      : guestStatus?.hasPaidCredit
+        ? 'Paid · ready for 1 face swap'
+        : `$${FACE_SWAP_GUEST_PRICE_USD.toFixed(2)} per generation`;
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -307,7 +477,16 @@ export default function FaceSwapPage() {
           <p className="text-gray-600">
             Upload a target photo and a face source photo. AI will swap the face onto your image.
           </p>
+          {!isLoggedIn && (
+            <p className="text-sm text-rose-700 mt-2">
+              Try once for free without signing in. After that, each use costs ${FACE_SWAP_GUEST_PRICE_USD.toFixed(2)}.
+            </p>
+          )}
         </div>
+
+        {paymentMessage && (
+          <div className="mb-6 p-3 bg-blue-50 text-blue-800 rounded-lg text-sm">{paymentMessage}</div>
+        )}
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           <div className="bg-white rounded-xl p-6 shadow-sm space-y-6">
@@ -339,8 +518,14 @@ export default function FaceSwapPage() {
             <div className="flex items-center justify-between text-sm text-gray-600 bg-rose-50 rounded-lg px-4 py-3">
               <span>Cost per generation</span>
               <span className="font-semibold text-rose-700 flex items-center">
-                {FACE_SWAP_PRICE}
-                <Coins className="w-4 h-4 ml-1" />
+                {isLoggedIn ? (
+                  <>
+                    {FACE_SWAP_PRICE}
+                    <Coins className="w-4 h-4 ml-1" />
+                  </>
+                ) : (
+                  costLabel
+                )}
               </span>
             </div>
 
@@ -363,6 +548,18 @@ export default function FaceSwapPage() {
                 'Start Face Swap'
               )}
             </button>
+
+            {!isLoggedIn && guestStatus?.trialUsed && !guestStatus.hasPaidCredit && (
+              <button
+                type="button"
+                onClick={() => setShowGuestPaymentModal(true)}
+                disabled={isProcessing || !targetFile || !faceFile}
+                className="w-full py-2.5 border border-rose-300 text-rose-700 rounded-lg font-medium hover:bg-rose-50 transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
+              >
+                <CreditCard className="w-4 h-4 mr-2" />
+                Pay ${FACE_SWAP_GUEST_PRICE_USD.toFixed(2)} with PayPal
+              </button>
+            )}
           </div>
 
           <div className="bg-white rounded-xl p-6 shadow-sm min-h-[320px]">
@@ -398,7 +595,7 @@ export default function FaceSwapPage() {
             ) : isProcessing ? (
               <div className="flex flex-col items-center justify-center h-64 text-gray-500">
                 <Loader2 className="w-12 h-12 animate-spin text-rose-500 mb-4" />
-                <p>{uploading ? 'Uploading your photos...' : 'AI is swapping the face...'}</p>
+                <p>{uploading ? 'Uploading your photos...' : paymentLoading ? 'Processing payment...' : 'AI is swapping the face...'}</p>
                 {taskId && (
                   <p className="text-xs text-gray-400 mt-2">Task ID: {taskId}</p>
                 )}
@@ -424,6 +621,63 @@ export default function FaceSwapPage() {
             className="max-w-full max-h-full object-contain"
             onClick={(e) => e.stopPropagation()}
           />
+        </div>
+      )}
+
+      {showGuestPaymentModal && (
+        <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-[100] p-4">
+          <div className="bg-white rounded-2xl max-w-md w-full p-6 shadow-xl">
+            <div className="flex items-start justify-between mb-4">
+              <div>
+                <h3 className="text-xl font-bold text-gray-900">Continue with PayPal</h3>
+                <p className="text-sm text-gray-600 mt-1">
+                  Your free trial is used. Pay ${FACE_SWAP_GUEST_PRICE_USD.toFixed(2)} for one face swap.
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowGuestPaymentModal(false)}
+                className="text-gray-400 hover:text-gray-600"
+                aria-label="Close"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <button
+              type="button"
+              onClick={handleGuestPayment}
+              disabled={paymentLoading || !targetFile || !faceFile}
+              className="w-full py-3 bg-[#0070ba] text-white rounded-lg font-medium hover:bg-[#005ea6] transition disabled:opacity-50 flex items-center justify-center"
+            >
+              {paymentLoading ? (
+                <>
+                  <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+                  Redirecting to PayPal...
+                </>
+              ) : (
+                <>
+                  <CreditCard className="w-5 h-5 mr-2" />
+                  Pay ${FACE_SWAP_GUEST_PRICE_USD.toFixed(2)}
+                </>
+              )}
+            </button>
+
+            <p className="text-xs text-gray-500 mt-3 text-center">
+              Or{' '}
+              <button
+                type="button"
+                onClick={() => {
+                  setShowGuestPaymentModal(false);
+                  setShowLoginModal(true);
+                }}
+                className="text-rose-600 hover:underline"
+              >
+                sign in
+              </button>{' '}
+              to use coins instead.
+            </p>
+          </div>
         </div>
       )}
 

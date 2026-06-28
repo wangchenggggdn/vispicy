@@ -1,5 +1,8 @@
-/** 换脸功能固定价格（金币） */
+/** 换脸功能固定价格（金币，登录用户） */
 export const FACE_SWAP_PRICE = 50;
+
+/** 未登录用户第二次及以后换脸价格（美元） */
+export const FACE_SWAP_GUEST_PRICE_USD = 0.8;
 
 /**
  * 价格配置系统

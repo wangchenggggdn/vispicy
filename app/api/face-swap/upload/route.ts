@@ -1,5 +1,3 @@
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth';
 import { uploadImageBuffer } from '@/lib/opengoon';
 import { NextResponse } from 'next/server';
 
@@ -7,12 +5,6 @@ const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
 
 export async function POST(request: Request) {
   try {
-    const session = await getServerSession(authOptions);
-
-    if (!session?.user?.id) {
-      return NextResponse.json({ error: 'Please login first' }, { status: 401 });
-    }
-
     const formData = await request.formData();
     const file = formData.get('file');
 
