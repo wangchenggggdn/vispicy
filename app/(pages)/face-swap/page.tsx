@@ -173,7 +173,6 @@ export default function FaceSwapPage() {
   const [showResultModal, setShowResultModal] = useState(false);
   const [showLoginModal, setShowLoginModal] = useState(false);
   const [showInsufficientCoinsModal, setShowInsufficientCoinsModal] = useState(false);
-  const [showGuestPaymentModal, setShowGuestPaymentModal] = useState(false);
   const [guestStatus, setGuestStatus] = useState<GuestStatus | null>(null);
   const [paymentLoading, setPaymentLoading] = useState(false);
   const [paymentMessage, setPaymentMessage] = useState('');
@@ -275,6 +274,42 @@ export default function FaceSwapPage() {
     }
   };
 
+  const handleGuestPayment = useCallback(async () => {
+    setPaymentLoading(true);
+    setError('');
+
+    try {
+      if (!targetFile) {
+        throw new Error('Please upload a target image before paying');
+      }
+
+      const [imageUrl, sourceUrl] = await Promise.all([
+        uploadImage(targetFile),
+        resolveImageUrl(faceFile, DEFAULT_FACE_SOURCE),
+      ]);
+
+      sessionStorage.setItem(PENDING_SWAP_KEY, JSON.stringify({ imageUrl, sourceUrl }));
+
+      const response = await fetch('/api/face-swap/payment/create-order', {
+        method: 'POST',
+      });
+
+      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to create payment');
+      }
+
+      if (data.approveUrl) {
+        window.location.href = data.approveUrl;
+      } else {
+        throw new Error('No payment URL received');
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Payment failed, please try again');
+      setPaymentLoading(false);
+    }
+  }, [targetFile, faceFile]);
+
   const runFaceSwap = useCallback(async (imageUrl: string, sourceUrl: string) => {
     const response = await fetch('/api/face-swap', {
       method: 'POST',
@@ -289,7 +324,7 @@ export default function FaceSwapPage() {
         if (session?.user?.id) {
           setShowInsufficientCoinsModal(true);
         } else if (data.requiresPayment) {
-          setShowGuestPaymentModal(true);
+          await handleGuestPayment();
         }
         return null;
       }
@@ -303,7 +338,7 @@ export default function FaceSwapPage() {
     }
 
     return data.taskId as string;
-  }, [session?.user?.id, refreshGuestStatus]);
+  }, [session?.user?.id, refreshGuestStatus, handleGuestPayment]);
 
   const handleGenerate = async () => {
     if (!targetFile) {
@@ -421,42 +456,6 @@ export default function FaceSwapPage() {
 
     capturePayment();
   }, [searchParams, refreshGuestStatus, resumePendingSwap]);
-
-  const handleGuestPayment = async () => {
-    setPaymentLoading(true);
-    setError('');
-
-    try {
-      if (!targetFile) {
-        throw new Error('Please upload a target image before paying');
-      }
-
-      const [imageUrl, sourceUrl] = await Promise.all([
-        uploadImage(targetFile),
-        resolveImageUrl(faceFile, DEFAULT_FACE_SOURCE),
-      ]);
-
-      sessionStorage.setItem(PENDING_SWAP_KEY, JSON.stringify({ imageUrl, sourceUrl }));
-
-      const response = await fetch('/api/face-swap/payment/create-order', {
-        method: 'POST',
-      });
-
-      const data = await response.json();
-      if (!response.ok) {
-        throw new Error(data.error || 'Failed to create payment');
-      }
-
-      if (data.approveUrl) {
-        window.location.href = data.approveUrl;
-      } else {
-        throw new Error('No payment URL received');
-      }
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Payment failed, please try again');
-      setPaymentLoading(false);
-    }
-  };
 
   const handleDownload = async () => {
     if (!result?.url) return;
@@ -580,12 +579,21 @@ export default function FaceSwapPage() {
             {!isLoggedIn && guestStatus?.trialUsed && !guestStatus.hasPaidCredit && (
               <button
                 type="button"
-                onClick={() => setShowGuestPaymentModal(true)}
+                onClick={handleGuestPayment}
                 disabled={isProcessing || !targetFile}
                 className="w-full py-2.5 lg:py-3 border border-rose-300 text-rose-700 rounded-lg font-medium hover:bg-rose-50 transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center text-sm lg:text-base"
               >
-                <CreditCard className="w-4 h-4 mr-2" />
-                Pay ${FACE_SWAP_GUEST_PRICE_USD.toFixed(2)} with PayPal
+                {paymentLoading ? (
+                  <>
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    Redirecting to PayPal...
+                  </>
+                ) : (
+                  <>
+                    <CreditCard className="w-4 h-4 mr-2" />
+                    Pay ${FACE_SWAP_GUEST_PRICE_USD.toFixed(2)} with PayPal
+                  </>
+                )}
               </button>
             )}
           </div>
@@ -718,63 +726,6 @@ export default function FaceSwapPage() {
                 Close
               </button>
             </div>
-          </div>
-        </div>
-      )}
-
-      {showGuestPaymentModal && (
-        <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-[100] p-4">
-          <div className="bg-white rounded-2xl max-w-md w-full p-6 shadow-xl">
-            <div className="flex items-start justify-between mb-4">
-              <div>
-                <h3 className="text-xl font-bold text-gray-900">Continue with PayPal</h3>
-                <p className="text-sm text-gray-600 mt-1">
-                  Your free trial is used. Pay ${FACE_SWAP_GUEST_PRICE_USD.toFixed(2)} for one face swap.
-                </p>
-              </div>
-              <button
-                type="button"
-                onClick={() => setShowGuestPaymentModal(false)}
-                className="text-gray-400 hover:text-gray-600"
-                aria-label="Close"
-              >
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-
-            <button
-              type="button"
-              onClick={handleGuestPayment}
-              disabled={paymentLoading || !targetFile}
-              className="w-full py-3 bg-[#0070ba] text-white rounded-lg font-medium hover:bg-[#005ea6] transition disabled:opacity-50 flex items-center justify-center"
-            >
-              {paymentLoading ? (
-                <>
-                  <Loader2 className="w-5 h-5 mr-2 animate-spin" />
-                  Redirecting to PayPal...
-                </>
-              ) : (
-                <>
-                  <CreditCard className="w-5 h-5 mr-2" />
-                  Pay ${FACE_SWAP_GUEST_PRICE_USD.toFixed(2)}
-                </>
-              )}
-            </button>
-
-            <p className="text-xs text-gray-500 mt-3 text-center">
-              Or{' '}
-              <button
-                type="button"
-                onClick={() => {
-                  setShowGuestPaymentModal(false);
-                  setShowLoginModal(true);
-                }}
-                className="text-rose-600 hover:underline"
-              >
-                sign in
-              </button>{' '}
-              to use coins instead.
-            </p>
           </div>
         </div>
       )}
