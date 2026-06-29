@@ -2,7 +2,7 @@
 export const FACE_SWAP_PRICE = 50;
 
 /** 未登录用户第二次及以后换脸价格（美元） */
-export const FACE_SWAP_GUEST_PRICE_USD = 0.8;
+export const FACE_SWAP_GUEST_PRICE_USD = 0.99;
 
 /**
  * 价格配置系统
